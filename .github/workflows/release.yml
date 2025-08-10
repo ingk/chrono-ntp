@@ -1,0 +1,75 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.2'
+
+      - name: Build
+        run: |
+          mkdir -p dist
+          EXT=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}*
+
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v5
+      with:
+        path: dist
+
+    - name: Copy LICENSE
+      run: cp LICENSE.txt dist/
+
+    - name: Create tag variable
+      id: tag
+      run: |
+        TAG=v$(date +%Y%m%d%H%M)
+        echo "$TAG"
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+    - name: Create tag
+      uses: rickstaa/action-create-tag@v1
+      with:
+        tag: ${{ steps.tag.outputs.tag }}
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/**/*
+        fail_on_unmatched_files: true
+        tag_name: ${{ steps.tag.outputs.tag }}
+        name: chrono-ntp ${{ steps.tag.outputs.tag }}
