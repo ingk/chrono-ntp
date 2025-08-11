@@ -1,7 +1,7 @@
 APP_NAME = chrono-ntp
 SRC = main.go
 
-.PHONY: all build clean run
+.PHONY: all build clean run readme-demo
 
 all: build
 
@@ -13,3 +13,6 @@ run:
 
 clean:
 	rm -f $(APP_NAME)
+
+readme-demo:
+	vhs README-demo.tape --output README-demo.gif

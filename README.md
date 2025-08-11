@@ -51,6 +51,8 @@ Usage of ./chrono-ntp:
 ./chrono-ntp -server time.google.com -timezone Europe/Berlin
 ```
 
+![demo](README-demo.gif)
+
 ## Build from Source
 
 To build chrono-ntp from source, you will need Go installed (version 1.18 or newer recommended).
