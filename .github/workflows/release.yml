@@ -73,3 +73,10 @@ jobs:
         fail_on_unmatched_files: true
         tag_name: ${{ steps.tag.outputs.tag }}
         name: chrono-ntp ${{ steps.tag.outputs.tag }}
+
+    - name: Trigger Homebrew formula update
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.HOMEBREW_REPO_PAT }}
+        repository: ingk/homebrew-chrono-ntp
+        event-type: update-formula
