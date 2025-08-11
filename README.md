@@ -20,6 +20,28 @@ You can download the latest release from the [releases page on GitHub](https://g
 
 Simply download the appropriate binary for your platform and follow the usage instructions.
 
+## Usage
+
+Run chrono-ntp from your terminal:
+
+```sh
+./chrono-ntp [options]
+```
+
+```
+Usage of ./chrono-ntp:
+  -server string
+        NTP server to sync time from (default "time.google.com")
+  -timezone string
+        NTP server to sync time from (default "Local")
+```
+
+### Example
+
+```sh
+./chrono-ntp -server time.google.com -timezone Europe/Berlin
+```
+
 ## Build from Source
 
 To build chrono-ntp from source, you will need Go installed (version 1.18 or newer recommended).
