@@ -20,6 +20,15 @@ You can download the latest release from the [releases page on GitHub](https://g
 
 Simply download the appropriate binary for your platform and follow the usage instructions.
 
+### Installation via Homebrew
+
+macOS or Linux users can use [Homebrew](https://brew.sh/) to install chrono-ntp.
+
+```bash
+brew tap ingk/chrono-ntp
+brew install chrono-ntp
+```
+
 ## Usage
 
 Run chrono-ntp from your terminal:
