@@ -19,6 +19,7 @@ func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 
 func main() {
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
+	timezone := flag.String("timezone", "Local", "NTP server to sync time from")
 	flag.Parse()
 
 	ntpTime, err := ntp.Time(*ntpServer)
@@ -26,6 +27,11 @@ func main() {
 		log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 	}
 	offset := time.Since(ntpTime)
+
+	timezoneLocation, err := time.LoadLocation(*timezone)
+	if err != nil {
+		log.Fatalf("failed to load location: %v", err)
+	}
 
 	s, err := tcell.NewScreen()
 	if err != nil {
@@ -58,7 +64,7 @@ func main() {
 	}()
 
 	for !quit {
-		now := time.Now().Add(-offset)
+		now := time.Now().Add(-offset).In(timezoneLocation)
 		s.Clear()
 
 		w, h := s.Size()
