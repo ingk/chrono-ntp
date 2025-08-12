@@ -34,11 +34,11 @@ brew install chrono-ntp
 Run chrono-ntp from your terminal:
 
 ```sh
-./chrono-ntp [options]
+chrono-ntp [options]
 ```
 
 ```
-Usage of ./chrono-ntp:
+Usage of chrono-ntp:
   -server string
         NTP server to sync time from (default "time.google.com")
   -timezone string
@@ -48,7 +48,7 @@ Usage of ./chrono-ntp:
 ### Example
 
 ```sh
-./chrono-ntp -server time.google.com -timezone Europe/Berlin
+chrono-ntp -server time.google.com -timezone Europe/Berlin
 ```
 
 ![demo](README-demo.gif)
