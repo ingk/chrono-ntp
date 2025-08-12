@@ -1,5 +1,5 @@
 APP_NAME = chrono-ntp
-SRC = main.go
+SRC = src/main.go
 
 .PHONY: all build clean run readme-demo
 
