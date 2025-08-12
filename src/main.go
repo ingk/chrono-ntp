@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/beevik/ntp"
@@ -17,10 +18,16 @@ func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 	}
 }
 
+func normalizeTimezoneName(location *time.Location) string {
+	// Replace underscores with spaces for better readability
+	return strings.ReplaceAll(location.String(), "_", " ")
+}
+
 func main() {
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
 	timezone := flag.String("timezone", "Local", "NTP server to sync time from")
 	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
+	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
 	flag.Parse()
 
 	ntpTime, err := ntp.Time(*ntpServer)
@@ -75,8 +82,12 @@ func main() {
 		dateStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite)
 		boldStyle := tcell.StyleDefault.Bold(true).Foreground(tcell.ColorWhite)
 		centerY := h/2 - 1
-		drawTextCentered(s, centerY, dateStr, dateStyle)
-		drawTextCentered(s, centerY+1, timeStr, boldStyle)
+		drawTextCentered(s, centerY-1, dateStr, dateStyle)
+		drawTextCentered(s, centerY, timeStr, boldStyle)
+
+		if *showTimezone {
+			drawTextCentered(s, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault.Foreground(tcell.ColorWhite))
+		}
 
 		if !*hideStatusbar {
 			x := (w - len("Quit Q, <C-c>")) / 2
