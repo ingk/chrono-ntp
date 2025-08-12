@@ -42,16 +42,16 @@ func main() {
 		log.Fatalf("failed to load location: %v", err)
 	}
 
-	s, err := tcell.NewScreen()
+	screen, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("Failed to create screen: %v", err)
 	}
-	if err := s.Init(); err != nil {
+	if err := screen.Init(); err != nil {
 		log.Fatalf("Failed to initialize screen: %v", err)
 	}
-	defer s.Fini()
+	defer screen.Fini()
 
-	s.Clear()
+	screen.Clear()
 
 	quit := false
 	ticker := time.NewTicker(time.Second)
@@ -59,7 +59,7 @@ func main() {
 
 	go func() {
 		for {
-			ev := s.PollEvent()
+			ev := screen.PollEvent()
 			switch tev := ev.(type) {
 			case *tcell.EventKey:
 				if tev.Key() == tcell.KeyCtrlC || tev.Rune() == 'q' || tev.Rune() == 'Q' {
@@ -67,43 +67,42 @@ func main() {
 					return
 				}
 			case *tcell.EventResize:
-				s.Sync()
+				screen.Sync()
 			}
 		}
 	}()
 
 	for !quit {
 		now := time.Now().Add(-offset).In(timezoneLocation)
-		s.Clear()
+		screen.Clear()
 
-		w, h := s.Size()
+		width, height := screen.Size()
 
 		dateStr := now.Format("2006-01-02")
 		timeStr := now.Format("15:04:05")
-		boldStyle := tcell.StyleDefault.Bold(true)
-		centerY := h/2 - 1
+		centerY := height/2 - 1
 
 		if !*hideDate {
-			drawTextCentered(s, centerY-1, dateStr, tcell.StyleDefault)
+			drawTextCentered(screen, centerY-1, dateStr, tcell.StyleDefault)
 		}
 
-		drawTextCentered(s, centerY, timeStr, boldStyle)
+		drawTextCentered(screen, centerY, timeStr, boldStyle)
 
 		if *showTimezone {
-			drawTextCentered(s, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault)
+			drawTextCentered(screen, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault)
 		}
 
 		if !*hideStatusbar {
 			x := (w - len("Quit Q, <C-c>")) / 2
 			for i, r := range "Quit" {
-				s.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true))
+				screen.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true))
 			}
 			for i, r := range " Q, <C-c>" {
-				s.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault)
+				screen.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault)
 			}
 		}
 
-		s.Show()
+		screen.Show()
 
 		<-ticker.C
 	}
