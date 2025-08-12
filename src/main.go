@@ -79,7 +79,6 @@ func main() {
 
 	for !quit {
 		now := time.Now().Add(-offset).In(timezoneLocation)
-		screen.Clear()
 
 		width, height := screen.Size()
 
