@@ -20,6 +20,7 @@ func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 func main() {
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
 	timezone := flag.String("timezone", "Local", "NTP server to sync time from")
+	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
 	flag.Parse()
 
 	ntpTime, err := ntp.Time(*ntpServer)
@@ -77,12 +78,14 @@ func main() {
 		drawTextCentered(s, centerY, dateStr, dateStyle)
 		drawTextCentered(s, centerY+1, timeStr, boldStyle)
 
-		x := (w - len("Quit Q, <C-c>")) / 2
-		for i, r := range "Quit" {
-			s.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true).Foreground(tcell.ColorWhite))
-		}
-		for i, r := range " Q, <C-c>" {
-			s.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+		if !*hideStatusbar {
+			x := (w - len("Quit Q, <C-c>")) / 2
+			for i, r := range "Quit" {
+				s.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true).Foreground(tcell.ColorWhite))
+			}
+			for i, r := range " Q, <C-c>" {
+				s.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+			}
 		}
 
 		s.Show()
