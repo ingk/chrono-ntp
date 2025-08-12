@@ -80,27 +80,26 @@ func main() {
 
 		dateStr := now.Format("2006-01-02")
 		timeStr := now.Format("15:04:05")
-		dateStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite)
-		boldStyle := tcell.StyleDefault.Bold(true).Foreground(tcell.ColorWhite)
+		boldStyle := tcell.StyleDefault.Bold(true)
 		centerY := h/2 - 1
 
 		if !*hideDate {
-			drawTextCentered(s, centerY-1, dateStr, dateStyle)
+			drawTextCentered(s, centerY-1, dateStr, tcell.StyleDefault)
 		}
 
 		drawTextCentered(s, centerY, timeStr, boldStyle)
 
 		if *showTimezone {
-			drawTextCentered(s, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault.Foreground(tcell.ColorWhite))
+			drawTextCentered(s, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault)
 		}
 
 		if !*hideStatusbar {
 			x := (w - len("Quit Q, <C-c>")) / 2
 			for i, r := range "Quit" {
-				s.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true).Foreground(tcell.ColorWhite))
+				s.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true))
 			}
 			for i, r := range " Q, <C-c>" {
-				s.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault.Foreground(tcell.ColorWhite))
+				s.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault)
 			}
 		}
 
