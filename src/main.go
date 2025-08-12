@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"slices"
 	"strings"
 	"time"
 
@@ -62,7 +63,7 @@ func main() {
 			ev := screen.PollEvent()
 			switch tev := ev.(type) {
 			case *tcell.EventKey:
-				if tev.Key() == tcell.KeyCtrlC || tev.Rune() == 'q' || tev.Rune() == 'Q' {
+				if tev.Key() == tcell.KeyCtrlC || slices.Contains([]rune{'q', 'Q'}, tev.Rune()) {
 					quit = true
 					return
 				}
@@ -71,6 +72,10 @@ func main() {
 			}
 		}
 	}()
+
+	boldStyle := tcell.StyleDefault.Bold(true)
+	statusbarQuitLabel := "Quit"
+	statusbarQuitShortcut := "Q, <C-c>"
 
 	for !quit {
 		now := time.Now().Add(-offset).In(timezoneLocation)
@@ -93,12 +98,12 @@ func main() {
 		}
 
 		if !*hideStatusbar {
-			x := (w - len("Quit Q, <C-c>")) / 2
-			for i, r := range "Quit" {
-				screen.SetContent(x+i, h-2, r, nil, tcell.StyleDefault.Bold(true))
+			x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
+			for i, r := range statusbarQuitLabel {
+				screen.SetContent(x+i, height-2, r, nil, tcell.StyleDefault.Bold(true))
 			}
-			for i, r := range " Q, <C-c>" {
-				screen.SetContent(x+4+i, h-2, r, nil, tcell.StyleDefault)
+			for i, r := range " " + statusbarQuitShortcut {
+				screen.SetContent(x+4+i, height-2, r, nil, tcell.StyleDefault)
 			}
 		}
 
