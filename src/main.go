@@ -11,6 +11,20 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+func drawStatusbar(screen tcell.Screen) {
+	statusbarQuitLabel := "Quit"
+	statusbarQuitShortcut := "Q, <C-c>"
+	width, height := screen.Size()
+
+	x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
+	for i, r := range statusbarQuitLabel {
+		screen.SetContent(x+i, height-2, r, nil, tcell.StyleDefault.Bold(true))
+	}
+	for i, r := range " " + statusbarQuitShortcut {
+		screen.SetContent(x+4+i, height-2, r, nil, tcell.StyleDefault)
+	}
+}
+
 func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 	w, _ := s.Size()
 	x := (w - len(text)) / 2
@@ -40,7 +54,7 @@ func main() {
 
 	timezoneLocation, err := time.LoadLocation(*timezone)
 	if err != nil {
-		log.Fatalf("failed to load location: %v", err)
+		log.Fatalf("Failed to load location: %v", err)
 	}
 
 	screen, err := tcell.NewScreen()
@@ -73,37 +87,26 @@ func main() {
 		}
 	}()
 
-	boldStyle := tcell.StyleDefault.Bold(true)
-	statusbarQuitLabel := "Quit"
-	statusbarQuitShortcut := "Q, <C-c>"
-
 	for !quit {
 		now := time.Now().Add(-offset).In(timezoneLocation)
 
-		width, height := screen.Size()
-
-		dateStr := now.Format("2006-01-02")
-		timeStr := now.Format("15:04:05")
+		_, height := screen.Size()
 		centerY := height/2 - 1
 
+		timeStr := now.Format("15:04:05")
+		drawTextCentered(screen, centerY, timeStr, tcell.StyleDefault.Bold(true))
+
 		if !*hideDate {
+			dateStr := now.Format("2006-01-02")
 			drawTextCentered(screen, centerY-1, dateStr, tcell.StyleDefault)
 		}
-
-		drawTextCentered(screen, centerY, timeStr, boldStyle)
 
 		if *showTimezone {
 			drawTextCentered(screen, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault)
 		}
 
 		if !*hideStatusbar {
-			x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
-			for i, r := range statusbarQuitLabel {
-				screen.SetContent(x+i, height-2, r, nil, tcell.StyleDefault.Bold(true))
-			}
-			for i, r := range " " + statusbarQuitShortcut {
-				screen.SetContent(x+4+i, height-2, r, nil, tcell.StyleDefault)
-			}
+			drawStatusbar(screen)
 		}
 
 		screen.Show()
