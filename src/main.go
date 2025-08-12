@@ -27,6 +27,7 @@ func main() {
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
 	timezone := flag.String("timezone", "Local", "NTP server to sync time from")
 	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
+	hideDate := flag.Bool("hide-date", false, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
 	flag.Parse()
 
@@ -82,7 +83,11 @@ func main() {
 		dateStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite)
 		boldStyle := tcell.StyleDefault.Bold(true).Foreground(tcell.ColorWhite)
 		centerY := h/2 - 1
-		drawTextCentered(s, centerY-1, dateStr, dateStyle)
+
+		if !*hideDate {
+			drawTextCentered(s, centerY-1, dateStr, dateStyle)
+		}
+
 		drawTextCentered(s, centerY, timeStr, boldStyle)
 
 		if *showTimezone {
