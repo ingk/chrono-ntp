@@ -18,10 +18,10 @@ func drawStatusbar(screen tcell.Screen) {
 
 	x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
 	for i, r := range statusbarQuitLabel {
-		screen.SetContent(x+i, height-2, r, nil, tcell.StyleDefault.Bold(true))
+		screen.SetContent(x+i, height-1, r, nil, tcell.StyleDefault.Bold(true))
 	}
 	for i, r := range " " + statusbarQuitShortcut {
-		screen.SetContent(x+4+i, height-2, r, nil, tcell.StyleDefault)
+		screen.SetContent(x+4+i, height-1, r, nil, tcell.StyleDefault)
 	}
 }
 
