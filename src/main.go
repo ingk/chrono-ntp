@@ -40,7 +40,7 @@ func normalizeTimezoneName(location *time.Location) string {
 
 func main() {
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
-	timezone := flag.String("timezone", "Local", "NTP server to sync time from")
+	timezone := flag.String("timezone", "Local", "Name of the timezone (e.g., 'America/New_York')")
 	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", false, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
