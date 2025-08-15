@@ -12,37 +12,19 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func drawStatusbar(screen tcell.Screen) {
-	statusbarQuitLabel := "Quit"
-	statusbarQuitShortcut := "Q, <C-c>"
-	width, height := screen.Size()
+const defaultNtpServer = "time.google.com"
+const defaultTimeFormat = "ISO8601"
+const defaultTimezone = "Local"
 
-	x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
-	for i, r := range statusbarQuitLabel {
-		screen.SetContent(x+i, height-1, r, nil, tcell.StyleDefault.Bold(true))
-	}
-	for i, r := range " " + statusbarQuitShortcut {
-		screen.SetContent(x+4+i, height-1, r, nil, tcell.StyleDefault)
-	}
-}
-
-func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
-	w, _ := s.Size()
-	x := (w - len(text)) / 2
-	for i, r := range text {
-		s.SetContent(x+i, y, r, nil, style)
-	}
-}
+var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 
 func main() {
-	allowedTimeFormats := []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
-
-	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
-	timezone := flag.String("timezone", "Local", "Name of the timezone (e.g., 'America/New_York')")
+	ntpServer := flag.String("server", defaultNtpServer, "NTP server to sync time from")
+	timezone := flag.String("timezone", defaultTimezone, "Name of the timezone (e.g., 'America/New_York')")
 	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", false, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
-	timeFormat := flag.String("time-format", "ISO8601", fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
+	timeFormat := flag.String("time-format", defaultTimeFormat, fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
@@ -113,5 +95,27 @@ func main() {
 		screen.Show()
 
 		<-ticker.C
+	}
+}
+
+func drawStatusbar(screen tcell.Screen) {
+	statusbarQuitLabel := "Quit"
+	statusbarQuitShortcut := "Q, <C-c>"
+	width, height := screen.Size()
+
+	x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
+	for i, r := range statusbarQuitLabel {
+		screen.SetContent(x+i, height-1, r, nil, tcell.StyleDefault.Bold(true))
+	}
+	for i, r := range " " + statusbarQuitShortcut {
+		screen.SetContent(x+4+i, height-1, r, nil, tcell.StyleDefault)
+	}
+}
+
+func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
+	w, _ := s.Size()
+	x := (w - len(text)) / 2
+	for i, r := range text {
+		s.SetContent(x+i, y, r, nil, style)
 	}
 }
