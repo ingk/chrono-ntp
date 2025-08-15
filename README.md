@@ -45,6 +45,15 @@ Usage of chrono-ntp:
         NTP server to sync time from (default "time.google.com")
   -timezone string
         NTP server to sync time from (default "Local")
+  -show-timezone
+        Show the timezone
+  -time-format string
+        Format for displaying time (ISO8601, 12h, 12h_AM_PM) (default "ISO8601")
+  -hide-date
+        Hide the current date
+  -hide-statusbar
+        Hide the status bar
+
 ```
 
 ### Example
