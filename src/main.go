@@ -24,7 +24,6 @@ var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 type Config struct {
 	Server        string `toml:"server"`
 	Timezone      string `toml:"timezone"`
-	Debug         bool   `toml:"debug"`
 	HideStatusbar bool   `toml:"hide-statusbar"`
 	HideDate      bool   `toml:"hide-date"`
 	ShowTimezone  bool   `toml:"show-timezone"`
@@ -36,7 +35,7 @@ func main() {
 
 	ntpServer := flag.String("server", config.Server, "NTP server to sync time from")
 	timezone := flag.String("timezone", config.Timezone, "Name of the timezone (e.g., 'America/New_York')")
-	debug := flag.Bool("debug", config.Debug, "Show debug information (e.g. offset from NTP server), then exit")
+	debug := flag.Bool("debug", false, "Show debug information (e.g. offset from NTP server), then exit")
 	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", config.ShowTimezone, "Show the timezone")
@@ -124,7 +123,6 @@ func loadConfig() Config {
 	config := Config{
 		Server:        defaultNtpServer,
 		Timezone:      defaultTimezone,
-		Debug:         false,
 		HideStatusbar: false,
 		HideDate:      false,
 		ShowTimezone:  true,
