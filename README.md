@@ -10,7 +10,7 @@
 
 ## About the Project
 
-<div style="text-align:center"><img src="assets/chrono-ntp.svg" width="200rem" height="200rem" /></div>
+<img src="assets/chrono-ntp.svg" width="200rem" height="200rem" />
 
 chrono-ntp is a simple command-line tool that synchronizes with an NTP (Network Time Protocol) server to account for any difference between your computer’s clock and the actual time, displaying the precise date and time in your terminal.
 
