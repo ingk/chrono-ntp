@@ -1,5 +1,4 @@
 APP_NAME = chrono-ntp
-SRC = src/main.go
 
 .PHONY: all test build clean run readme-demo
 
@@ -9,10 +8,10 @@ test:
 	go test ./src/...
 
 build:
-	go build -o $(APP_NAME) $(SRC)
+	go build -o $(APP_NAME) ./src/...
 
 run:
-	go run $(SRC) --server=time.google.com
+	go run ./src/... --server=time.google.com
 
 clean:
 	rm -f $(APP_NAME)
