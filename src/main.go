@@ -21,6 +21,7 @@ var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 func main() {
 	ntpServer := flag.String("server", defaultNtpServer, "NTP server to sync time from")
 	timezone := flag.String("timezone", defaultTimezone, "Name of the timezone (e.g., 'America/New_York')")
+	debug := flag.Bool("debug", false, "Show debug information (e.g. offset from NTP server), then exit")
 	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", false, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
@@ -36,6 +37,12 @@ func main() {
 		log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 	}
 	offset := time.Since(ntpTime)
+
+	if *debug {
+		log.Printf("NTP server: %s", *ntpServer)
+		log.Printf("Offset: %s", offset.String())
+		return
+	}
 
 	timezoneLocation, err := time.LoadLocation(*timezone)
 	if err != nil {

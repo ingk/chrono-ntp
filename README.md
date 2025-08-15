@@ -53,7 +53,8 @@ Usage of chrono-ntp:
         Hide the current date
   -hide-statusbar
         Hide the status bar
-
+  -debug
+        Show debug information (e.g. offset from NTP server), then exit
 ```
 
 ### Example
