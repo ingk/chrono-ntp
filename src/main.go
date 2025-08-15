@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/beevik/ntp"
@@ -33,12 +35,19 @@ func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 }
 
 func main() {
+	allowedTimeFormats := []string{"ISO8601", "12h", "12h_AM_PM"}
+
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
 	timezone := flag.String("timezone", "Local", "Name of the timezone (e.g., 'America/New_York')")
 	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", false, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
+	timeFormat := flag.String("time-format", "ISO8601", fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
 	flag.Parse()
+
+	if !slices.Contains(allowedTimeFormats, *timeFormat) {
+		log.Fatalf("Error: invalid time format '%s'. Allowed values: ISO8601, 12h, 12h_AM_PM", *timeFormat)
+	}
 
 	ntpTime, err := ntp.Time(*ntpServer)
 	if err != nil {
@@ -87,7 +96,7 @@ func main() {
 		_, height := screen.Size()
 		centerY := height/2 - 1
 
-		drawTextCentered(screen, centerY, formatTime(now), tcell.StyleDefault.Bold(true))
+		drawTextCentered(screen, centerY, formatTime(now, timeFormat), tcell.StyleDefault.Bold(true))
 
 		if !*hideDate {
 			drawTextCentered(screen, centerY-1, formatDate(now), tcell.StyleDefault)
