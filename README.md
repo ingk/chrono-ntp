@@ -48,7 +48,7 @@ Usage of chrono-ntp:
   -show-timezone
         Show the timezone
   -time-format string
-        Format for displaying time (ISO8601, 12h, 12h_AM_PM) (default "ISO8601")
+        Format for displaying time (ISO8601, 12h, 12h_AM_PM, .beat) (default "ISO8601")
   -hide-date
         Hide the current date
   -hide-statusbar

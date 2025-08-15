@@ -30,15 +30,23 @@ func TestFormatDate(t *testing.T) {
 }
 
 func TestFormatTime(t *testing.T) {
-	inputTime := time.Date(2023, 10, 1, 20, 13, 14, 0, time.UTC)
+	inputTime := time.Date(2023, 10, 1, 15, 16, 17, 0, time.UTC)
 
 	result := formatTime(inputTime, sPtr("ISO8601"))
-	if result != "20:13:14" {
-		t.Errorf("Expected '20:13:14', got '%s'", result)
+	if result != "15:16:17" {
+		t.Errorf("Expected '15:16:17', got '%s'", result)
 	}
 
 	result = formatTime(inputTime, sPtr("12h"))
-	if result != "08:13:14" {
-		t.Errorf("Expected '08:13:14', got '%s'", result)
+	if result != "03:16:17" {
+		t.Errorf("Expected '03:16:17', got '%s'", result)
+	}
+
+	// .beat test: inputTime is 2023-10-01 20:13:14 UTC
+	// UTC+1 = 21:13:14, seconds since midnight = 21*3600+13*60+14 = 76414
+	// .beat = 76414 / 86.4 = 884.5 -> @884
+	result = formatTime(inputTime, sPtr(".beat"))
+	if result != "@677" {
+		t.Errorf("Expected '@677', got '%s'", result)
 	}
 }

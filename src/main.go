@@ -35,7 +35,7 @@ func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 }
 
 func main() {
-	allowedTimeFormats := []string{"ISO8601", "12h", "12h_AM_PM"}
+	allowedTimeFormats := []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 
 	ntpServer := flag.String("server", "time.google.com", "NTP server to sync time from")
 	timezone := flag.String("timezone", "Local", "Name of the timezone (e.g., 'America/New_York')")
@@ -46,7 +46,7 @@ func main() {
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
-		log.Fatalf("Error: invalid time format '%s'. Allowed values: ISO8601, 12h, 12h_AM_PM", *timeFormat)
+		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats, ", "))
 	}
 
 	ntpTime, err := ntp.Time(*ntpServer)
