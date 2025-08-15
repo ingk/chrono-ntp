@@ -59,6 +59,23 @@ Usage of chrono-ntp:
         Show debug information (e.g. offset from NTP server), then exit
 ```
 
+### Configuration File
+
+chrono-ntp supports a configuration file for default values. You can create a TOML file at `~/.chrono-ntp.toml` to specify your preferred options, which will be loaded automatically on startup.
+
+Example `~/.chrono-ntp.toml`:
+
+```toml
+server = "time.google.com"
+timezone = "Europe/Berlin"
+show_timezone = true
+time_format = "ISO8601"
+hide_date = false
+hide_statusbar = false
+```
+
+Any command-line options will override the values set in the configuration file.
+
 ### Example
 
 ```sh
