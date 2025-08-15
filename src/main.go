@@ -4,12 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/beevik/ntp"
 	"github.com/gdamore/tcell/v2"
+	"github.com/pelletier/go-toml/v2"
 )
 
 const defaultNtpServer = "time.google.com"
@@ -18,14 +21,26 @@ const defaultTimezone = "Local"
 
 var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 
+type Config struct {
+	Server        string `toml:"server"`
+	Timezone      string `toml:"timezone"`
+	Debug         bool   `toml:"debug"`
+	HideStatusbar bool   `toml:"hide-statusbar"`
+	HideDate      bool   `toml:"hide-date"`
+	ShowTimezone  bool   `toml:"show-timezone"`
+	TimeFormat    string `toml:"time-format"`
+}
+
 func main() {
-	ntpServer := flag.String("server", defaultNtpServer, "NTP server to sync time from")
-	timezone := flag.String("timezone", defaultTimezone, "Name of the timezone (e.g., 'America/New_York')")
-	debug := flag.Bool("debug", false, "Show debug information (e.g. offset from NTP server), then exit")
-	hideStatusbar := flag.Bool("hide-statusbar", false, "Hide the status bar")
-	hideDate := flag.Bool("hide-date", false, "Hide the current date")
-	showTimezone := flag.Bool("show-timezone", false, "Show the timezone")
-	timeFormat := flag.String("time-format", defaultTimeFormat, fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
+	config := loadConfig()
+
+	ntpServer := flag.String("server", config.Server, "NTP server to sync time from")
+	timezone := flag.String("timezone", config.Timezone, "Name of the timezone (e.g., 'America/New_York')")
+	debug := flag.Bool("debug", config.Debug, "Show debug information (e.g. offset from NTP server), then exit")
+	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
+	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the current date")
+	showTimezone := flag.Bool("show-timezone", config.ShowTimezone, "Show the timezone")
+	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
@@ -103,6 +118,31 @@ func main() {
 
 		<-ticker.C
 	}
+}
+
+func loadConfig() Config {
+	config := Config{
+		Server:        defaultNtpServer,
+		Timezone:      defaultTimezone,
+		Debug:         false,
+		HideStatusbar: false,
+		HideDate:      false,
+		ShowTimezone:  true,
+		TimeFormat:    defaultTimeFormat,
+	}
+
+	configPath := filepath.Join(os.Getenv("HOME"), ".chrono-ntp.toml")
+	if _, err := os.Stat(configPath); err == nil {
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			log.Fatalf("Failed to read config file %s: %v", configPath, err)
+		}
+		if err := toml.Unmarshal(data, &config); err != nil {
+			log.Fatalf("Failed to parse config file %s: %v", configPath, err)
+		}
+	}
+
+	return config
 }
 
 func drawStatusbar(screen tcell.Screen) {
