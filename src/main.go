@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/beevik/ntp"
@@ -31,11 +30,6 @@ func drawTextCentered(s tcell.Screen, y int, text string, style tcell.Style) {
 	for i, r := range text {
 		s.SetContent(x+i, y, r, nil, style)
 	}
-}
-
-func normalizeTimezoneName(location *time.Location) string {
-	// Replace underscores with spaces for better readability
-	return strings.ReplaceAll(location.String(), "_", " ")
 }
 
 func main() {
@@ -93,12 +87,10 @@ func main() {
 		_, height := screen.Size()
 		centerY := height/2 - 1
 
-		timeStr := now.Format("15:04:05")
-		drawTextCentered(screen, centerY, timeStr, tcell.StyleDefault.Bold(true))
+		drawTextCentered(screen, centerY, formatTime(now), tcell.StyleDefault.Bold(true))
 
 		if !*hideDate {
-			dateStr := now.Format("2006-01-02")
-			drawTextCentered(screen, centerY-1, dateStr, tcell.StyleDefault)
+			drawTextCentered(screen, centerY-1, formatDate(now), tcell.StyleDefault)
 		}
 
 		if *showTimezone {

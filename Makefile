@@ -1,9 +1,12 @@
 APP_NAME = chrono-ntp
 SRC = src/main.go
 
-.PHONY: all build clean run readme-demo
+.PHONY: all test build clean run readme-demo
 
-all: build
+all: test build
+
+test:
+	go test ./src/...
 
 build:
 	go build -o $(APP_NAME) $(SRC)
