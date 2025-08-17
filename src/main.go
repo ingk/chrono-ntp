@@ -33,14 +33,14 @@ type Config struct {
 func main() {
 	config := loadConfig()
 
-	ntpServer := flag.String("server", config.Server, "NTP server to sync time from")
-	timeZone := flag.String("time-zone", config.TimeZone, "Name of the time zone (e.g., 'America/New_York')")
-	debug := flag.Bool("debug", false, "Show debug information (e.g. offset from NTP server), then exit")
+	ntpServer := flag.String("server", config.Server, "NTP server to synchronize time from")
+	timeZone := flag.String("time-zone", config.TimeZone, "Time zone name (e.g., 'America/New_York')")
+	debug := flag.Bool("debug", false, "Show debug information (e.g., offset from NTP server) and exit")
 	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
-	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the current date")
+	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the date display")
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
-	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
-	beeps := flag.Bool("beeps", false, "Play 6 beeps at the end of the minute for watch setting where the sixth beep is on second 0 (emulating the Greenwich Time Signal)")
+	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
+	beeps := flag.Bool("beeps", false, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
