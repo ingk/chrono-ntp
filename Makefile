@@ -17,4 +17,4 @@ clean:
 	rm -f $(APP_NAME)
 
 readme-demo:
-	vhs README-demo.tape --output README-demo.gif
+	vhs assets/demo.tape --output assets/demo.gif
