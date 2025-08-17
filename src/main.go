@@ -40,7 +40,6 @@ func main() {
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the date display")
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
-	beeps := flag.Bool("beeps", false, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
@@ -79,8 +78,6 @@ func main() {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
-	audioContext := InitializeAudioContext()
-
 	go func() {
 		for {
 			ev := screen.PollEvent()
@@ -116,22 +113,6 @@ func main() {
 
 		if !*hideStatusbar {
 			drawStatusbar(screen)
-		}
-
-		// Beep logic
-		if *beeps {
-			sec := now.Second()
-			// If last 5 seconds of the minute
-			if sec >= 55 || sec == 0 {
-				// Only beep once per second
-				go func(s int) {
-					if s == 0 {
-						PlayBeep(audioContext, 1*time.Second) // last beep, 1 second
-					} else {
-						PlayBeep(audioContext, 100*time.Millisecond) // short beep
-					}
-				}(sec)
-			}
 		}
 
 		screen.Show()

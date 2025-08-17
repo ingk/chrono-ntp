@@ -4,13 +4,11 @@ go 1.24.2
 
 require (
 	github.com/beevik/ntp v1.4.3
-	github.com/ebitengine/oto/v3 v3.3.3
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/pelletier/go-toml/v2 v2.2.4
 )
 
 require (
-	github.com/ebitengine/purego v0.8.0 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
