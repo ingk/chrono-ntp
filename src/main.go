@@ -17,16 +17,16 @@ import (
 
 const defaultNtpServer = "time.google.com"
 const defaultTimeFormat = "ISO8601"
-const defaultTimezone = "Local"
+const defaultTimeZone = "Local"
 
 var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 
 type Config struct {
 	Server        string `toml:"server"`
-	Timezone      string `toml:"timezone"`
+	TimeZone      string `toml:"time-zone"`
 	HideStatusbar bool   `toml:"hide-statusbar"`
 	HideDate      bool   `toml:"hide-date"`
-	ShowTimezone  bool   `toml:"show-timezone"`
+	ShowTimeZone  bool   `toml:"show-time-zone"`
 	TimeFormat    string `toml:"time-format"`
 }
 
@@ -34,11 +34,11 @@ func main() {
 	config := loadConfig()
 
 	ntpServer := flag.String("server", config.Server, "NTP server to sync time from")
-	timezone := flag.String("timezone", config.Timezone, "Name of the timezone (e.g., 'America/New_York')")
+	timeZone := flag.String("time-zone", config.TimeZone, "Name of the time zone (e.g., 'America/New_York')")
 	debug := flag.Bool("debug", false, "Show debug information (e.g. offset from NTP server), then exit")
 	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the current date")
-	showTimezone := flag.Bool("show-timezone", config.ShowTimezone, "Show the timezone")
+	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
 	beeps := flag.Bool("beeps", false, "Play 6 beeps at the end of the minute for watch setting where the sixth beep is on second 0 (emulating the Greenwich Time Signal)")
 	flag.Parse()
@@ -59,7 +59,7 @@ func main() {
 		return
 	}
 
-	timezoneLocation, err := time.LoadLocation(*timezone)
+	timeZoneLocation, err := time.LoadLocation(*timeZone)
 	if err != nil {
 		log.Fatalf("Failed to load location: %v", err)
 	}
@@ -99,7 +99,7 @@ func main() {
 	for !quit {
 		screen.Clear()
 
-		now := time.Now().Add(-offset).In(timezoneLocation)
+		now := time.Now().Add(-offset).In(timeZoneLocation)
 
 		_, height := screen.Size()
 		centerY := height/2 - 1
@@ -110,8 +110,8 @@ func main() {
 			drawTextCentered(screen, centerY-1, formatDate(now), tcell.StyleDefault)
 		}
 
-		if *showTimezone {
-			drawTextCentered(screen, centerY+1, normalizeTimezoneName(timezoneLocation), tcell.StyleDefault)
+		if *showTimeZone {
+			drawTextCentered(screen, centerY+1, normalizeTimezoneName(timeZoneLocation), tcell.StyleDefault)
 		}
 
 		if !*hideStatusbar {
@@ -143,10 +143,10 @@ func main() {
 func loadConfig() Config {
 	config := Config{
 		Server:        defaultNtpServer,
-		Timezone:      defaultTimezone,
+		TimeZone:      defaultTimeZone,
 		HideStatusbar: false,
 		HideDate:      false,
-		ShowTimezone:  true,
+		ShowTimeZone:  true,
 		TimeFormat:    defaultTimeFormat,
 	}
 

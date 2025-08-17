@@ -45,10 +45,10 @@ chrono-ntp [options]
 Usage of chrono-ntp:
   -server string
         NTP server to sync time from (default "time.google.com")
-  -timezone string
+  -time-zone string
         NTP server to sync time from (default "Local")
-  -show-timezone
-        Show the timezone
+  -show-time-zone
+        Show the time zone
   -time-format string
         Format for displaying time (ISO8601, 12h, 12h_AM_PM, .beat) (default "ISO8601")
   -hide-date
@@ -67,11 +67,11 @@ Example `~/.chrono-ntp.toml`:
 
 ```toml
 server = "time.google.com"
-timezone = "Europe/Berlin"
-show_timezone = true
-time_format = "ISO8601"
-hide_date = false
-hide_statusbar = false
+time-zone = "Europe/Berlin"
+show-time-zone = true
+time-format = "ISO8601"
+hide-date = false
+hide-statusbar = false
 ```
 
 Any command-line options will override the values set in the configuration file.
@@ -79,7 +79,7 @@ Any command-line options will override the values set in the configuration file.
 ### Example
 
 ```sh
-chrono-ntp -server time.google.com -timezone Europe/Berlin
+chrono-ntp -server time.google.com -time-zone Europe/Berlin
 ```
 
 ![Demo GIF](assets/demo.gif)
