@@ -40,6 +40,7 @@ func main() {
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the current date")
 	showTimezone := flag.Bool("show-timezone", config.ShowTimezone, "Show the timezone")
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Format for displaying time (%s)", strings.Join(allowedTimeFormats, ", ")))
+	beeps := flag.Bool("beeps", false, "Play 6 beeps at the end of the minute for watch setting where the sixth beep is on second 0 (emulating the Greenwich Time Signal)")
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
@@ -78,6 +79,8 @@ func main() {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
+	audioContext := InitializeAudioContext()
+
 	go func() {
 		for {
 			ev := screen.PollEvent()
@@ -94,6 +97,8 @@ func main() {
 	}()
 
 	for !quit {
+		screen.Clear()
+
 		now := time.Now().Add(-offset).In(timezoneLocation)
 
 		_, height := screen.Size()
@@ -111,6 +116,22 @@ func main() {
 
 		if !*hideStatusbar {
 			drawStatusbar(screen)
+		}
+
+		// Beep logic
+		if *beeps {
+			sec := now.Second()
+			// If last 5 seconds of the minute
+			if sec >= 55 || sec == 0 {
+				// Only beep once per second
+				go func(s int) {
+					if s == 0 {
+						PlayBeep(audioContext, 1*time.Second) // last beep, 1 second
+					} else {
+						PlayBeep(audioContext, 100*time.Millisecond) // short beep
+					}
+				}(sec)
+			}
 		}
 
 		screen.Show()
