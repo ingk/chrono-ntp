@@ -25,7 +25,7 @@ jobs:
       run: sudo apt install -y libasound2-dev
 
     - name: Test
-      run: go test ./src/...
+      run: make test
 
     - name: Build
-      run: make build
+      run: CGO_ENABLED=1 make build
