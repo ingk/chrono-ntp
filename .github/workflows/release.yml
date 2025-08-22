@@ -32,7 +32,7 @@ jobs:
           mkdir -p dist
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
-          CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
