@@ -23,6 +23,10 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Install development dependencies
+        if: ${{ matrix.goos == 'linux' }}
+        run: sudo apt install -y libasound2-dev
+
       - name: Build
         run: |
           mkdir -p dist
