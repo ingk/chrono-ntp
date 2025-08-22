@@ -46,7 +46,7 @@ Usage of chrono-ntp:
   -server string
         NTP server to sync time from (default "time.google.com")
   -time-zone string
-        NTP server to sync time from (default "Local")
+        Time zone name (e.g., 'America/New_York') (default "Local")
   -show-time-zone
         Show the time zone
   -time-format string
