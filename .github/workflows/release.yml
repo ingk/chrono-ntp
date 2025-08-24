@@ -48,11 +48,11 @@ jobs:
           mkdir -p dist
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
-            if [ "${{ matrix.goos }}" = "linux" ]; then
-              CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }} ./src/...
-            else
-              GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
-            fi
+          if [ "${{ matrix.goos }}" = "linux" ]; then
+            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }} ./src/...
+          else
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
+          fi
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
