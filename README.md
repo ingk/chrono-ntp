@@ -55,6 +55,8 @@ Usage of chrono-ntp:
         Hide the current date
   -hide-statusbar
         Hide the status bar
+  -beeps
+        Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)
   -debug
         Show debug information (e.g. offset from NTP server), then exit
 ```
