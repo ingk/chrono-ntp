@@ -4,35 +4,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
+
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/beevik/ntp"
 	"github.com/gdamore/tcell/v2"
-	"github.com/pelletier/go-toml/v2"
 )
-
-const defaultNtpServer = "time.google.com"
-const defaultTimeFormat = "ISO8601"
-const defaultTimeZone = "Local"
 
 var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 
-type Config struct {
-	Server        string `toml:"server"`
-	TimeZone      string `toml:"time-zone"`
-	HideStatusbar bool   `toml:"hide-statusbar"`
-	HideDate      bool   `toml:"hide-date"`
-	ShowTimeZone  bool   `toml:"show-time-zone"`
-	TimeFormat    string `toml:"time-format"`
-	Beeps         bool   `toml:"beeps"`
-}
-
 func main() {
-	config := loadConfig()
+	config := LoadConfiguration()
 
 	ntpServer := flag.String("server", config.Server, "NTP server to synchronize time from")
 	timeZone := flag.String("time-zone", config.TimeZone, "Time zone name (e.g., 'America/New_York')")
@@ -139,29 +123,4 @@ func main() {
 
 		<-ticker.C
 	}
-}
-
-func loadConfig() Config {
-	config := Config{
-		Server:        defaultNtpServer,
-		TimeZone:      defaultTimeZone,
-		HideStatusbar: false,
-		HideDate:      false,
-		ShowTimeZone:  true,
-		TimeFormat:    defaultTimeFormat,
-		Beeps:         false,
-	}
-
-	configPath := filepath.Join(os.Getenv("HOME"), ".chrono-ntp.toml")
-	if _, err := os.Stat(configPath); err == nil {
-		data, err := os.ReadFile(configPath)
-		if err != nil {
-			log.Fatalf("Failed to read config file %s: %v", configPath, err)
-		}
-		if err := toml.Unmarshal(data, &config); err != nil {
-			log.Fatalf("Failed to parse config file %s: %v", configPath, err)
-		}
-	}
-
-	return config
 }
