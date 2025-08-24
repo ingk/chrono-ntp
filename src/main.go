@@ -28,6 +28,7 @@ type Config struct {
 	HideDate      bool   `toml:"hide-date"`
 	ShowTimeZone  bool   `toml:"show-time-zone"`
 	TimeFormat    string `toml:"time-format"`
+	Beeps         bool   `toml:"beeps"`
 }
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the date display")
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
-	beeps := flag.Bool("beeps", false, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
+	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	flag.Parse()
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
@@ -148,6 +149,7 @@ func loadConfig() Config {
 		HideDate:      false,
 		ShowTimeZone:  true,
 		TimeFormat:    defaultTimeFormat,
+		Beeps:         false,
 	}
 
 	configPath := filepath.Join(os.Getenv("HOME"), ".chrono-ntp.toml")
