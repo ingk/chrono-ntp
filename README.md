@@ -48,7 +48,7 @@ Usage of chrono-ntp:
   -time-zone string
         Time zone name (e.g., 'America/New_York') (default "Local")
   -show-time-zone
-        Show the time zone
+        Show the time zone below time
   -time-format string
         Format for displaying time (ISO8601, 12h, 12h_AM_PM, .beat) (default "ISO8601")
   -hide-date
@@ -74,6 +74,7 @@ show-time-zone = true
 time-format = "ISO8601"
 hide-date = false
 hide-statusbar = false
+beeps = true
 ```
 
 Any command-line options will override the values set in the configuration file.
