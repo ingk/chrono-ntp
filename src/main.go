@@ -49,6 +49,11 @@ func main() {
 		log.Fatalf("Failed to load location: %v", err)
 	}
 
+	audioContext, err := InitializeAudioContext()
+	if err != nil {
+		log.Fatalf("Failed to initialize audio context: %v", err)
+	}
+
 	screen, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("Failed to create screen: %v", err)
@@ -63,8 +68,6 @@ func main() {
 	quit := false
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
-
-	audioContext := InitializeAudioContext()
 
 	go func() {
 		for {
@@ -103,17 +106,14 @@ func main() {
 			drawStatusbar(screen)
 		}
 
-		// Beep logic
 		if *beeps {
 			sec := now.Second()
-			// If last 5 seconds of the minute
 			if sec >= 55 || sec == 0 {
-				// Only beep once per second
 				go func(s int) {
 					if s == 0 {
-						PlayBeep(audioContext, 1*time.Second) // last beep, 1 second
+						PlayLongBeep(audioContext)
 					} else {
-						PlayBeep(audioContext, 100*time.Millisecond) // short beep
+						PlayShortBeep(audioContext)
 					}
 				}(sec)
 			}
