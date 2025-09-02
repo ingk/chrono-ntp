@@ -43,7 +43,7 @@ jobs:
         run: sudo apt install -y libasound2-dev
 
       - name: Test
-        run: go test ./src/...
+        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go test ./src/...
 
       - name: Static Analysis
         uses: dominikh/staticcheck-action@v1
