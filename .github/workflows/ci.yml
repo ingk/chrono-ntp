@@ -6,7 +6,7 @@ env:
   GO_VERSION: '1.24.2'
 
 jobs:
-  build:
+  ci:
     strategy:
       matrix:
         include:
@@ -16,18 +16,12 @@ jobs:
           - goos: linux
             goarch: arm64
             runs_on: ubuntu-24.04-arm
-          - goos: windows
-            goarch: amd64
-            runs_on: ubuntu-latest
-          - goos: windows
-            goarch: arm64
-            runs_on: ubuntu-24.04-arm
           - goos: darwin
             goarch: amd64
-            runs_on: ubuntu-latest
+            runs_on: macos-15-large
           - goos: darwin
             goarch: arm64
-            runs_on: ubuntu-24.04-arm
+            runs_on: macos-15
     runs-on: ${{ matrix.runs_on }}
     steps:
       - name: Checkout code
