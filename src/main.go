@@ -32,17 +32,33 @@ func main() {
 		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats, ", "))
 	}
 
+	if *debug {
+		log.Printf("NTP server: %s", *ntpServer)
+		return
+	}
+
+	// Initialize screen early to show loading message
+	screen, err := tcell.NewScreen()
+	if err != nil {
+		log.Fatalf("Failed to create screen: %v", err)
+	}
+	if err := screen.Init(); err != nil {
+		log.Fatalf("Failed to initialize screen: %v", err)
+	}
+	defer screen.Fini()
+
+	_, height := screen.Size()
+	centerY := height/2 - 1
+
+	screen.Clear()
+	drawTextCentered(screen, centerY, "Querying NTP server for time...", tcell.StyleDefault.Bold(true))
+	screen.Show()
+
 	ntpTime, err := ntp.Time(*ntpServer)
 	if err != nil {
 		log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 	}
 	offset := time.Since(ntpTime)
-
-	if *debug {
-		log.Printf("NTP server: %s", *ntpServer)
-		log.Printf("Offset: %s", offset.String())
-		return
-	}
 
 	timeZoneLocation, err := time.LoadLocation(*timeZone)
 	if err != nil {
@@ -53,17 +69,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
-
-	screen, err := tcell.NewScreen()
-	if err != nil {
-		log.Fatalf("Failed to create screen: %v", err)
-	}
-	if err := screen.Init(); err != nil {
-		log.Fatalf("Failed to initialize screen: %v", err)
-	}
-	defer screen.Fini()
-
-	screen.Clear()
 
 	quit := false
 	ticker := time.NewTicker(time.Second)
