@@ -70,9 +70,7 @@ func main() {
 		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
 
-	quit := false
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
+	quitChan := make(chan struct{})
 
 	go func() {
 		for {
@@ -80,7 +78,7 @@ func main() {
 			switch tev := ev.(type) {
 			case *tcell.EventKey:
 				if tev.Key() == tcell.KeyCtrlC || slices.Contains([]rune{'q', 'Q'}, tev.Rune()) {
-					quit = true
+					quitChan <- struct{}{}
 					return
 				}
 			case *tcell.EventResize:
@@ -89,43 +87,49 @@ func main() {
 		}
 	}()
 
-	for !quit {
-		screen.Clear()
+	ticker := time.NewTicker(time.Second)
+	defer ticker.Stop()
 
-		now := time.Now().Add(-offset).In(timeZoneLocation)
+	for {
+		select {
+		case <-ticker.C:
+			screen.Clear()
 
-		_, height := screen.Size()
-		centerY := height/2 - 1
+			now := time.Now().Add(-offset).In(timeZoneLocation)
 
-		drawTextCentered(screen, centerY, formatTime(now, timeFormat), tcell.StyleDefault.Bold(true))
+			_, height := screen.Size()
+			centerY := height/2 - 1
 
-		if !*hideDate {
-			drawTextCentered(screen, centerY-1, formatDate(now), tcell.StyleDefault)
-		}
+			drawTextCentered(screen, centerY, formatTime(now, timeFormat), tcell.StyleDefault.Bold(true))
 
-		if *showTimeZone {
-			drawTextCentered(screen, centerY+1, normalizeTimezoneName(timeZoneLocation), tcell.StyleDefault)
-		}
-
-		if !*hideStatusbar {
-			drawStatusbar(screen)
-		}
-
-		if *beeps {
-			sec := now.Second()
-			if sec >= 55 || sec == 0 {
-				go func(s int) {
-					if s == 0 {
-						PlayLongBeep(audioContext)
-					} else {
-						PlayShortBeep(audioContext)
-					}
-				}(sec)
+			if !*hideDate {
+				drawTextCentered(screen, centerY-1, formatDate(now), tcell.StyleDefault)
 			}
+
+			if *showTimeZone {
+				drawTextCentered(screen, centerY+1, normalizeTimezoneName(timeZoneLocation), tcell.StyleDefault)
+			}
+
+			if !*hideStatusbar {
+				drawStatusbar(screen)
+			}
+
+			if *beeps {
+				sec := now.Second()
+				if sec >= 55 || sec == 0 {
+					go func(s int) {
+						if s == 0 {
+							PlayLongBeep(audioContext)
+						} else {
+							PlayShortBeep(audioContext)
+						}
+					}(sec)
+				}
+			}
+
+			screen.Show()
+		case <-quitChan:
+			return
 		}
-
-		screen.Show()
-
-		<-ticker.C
 	}
 }
