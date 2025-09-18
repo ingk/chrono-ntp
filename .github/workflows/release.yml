@@ -7,7 +7,21 @@ env:
   GO_VERSION: '1.24.2'
 
 jobs:
+  set_tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
+    steps:
+      - name: Set tag variable
+        id: set_tag
+        run: |
+          TAG=v$(date +%Y%m%d%H%M)
+          echo "$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
   build:
+    needs: set_tag
+
     strategy:
       matrix:
         include:
@@ -29,7 +43,9 @@ jobs:
           - goos: darwin
             goarch: arm64
             runs_on: ubuntu-24.04-arm
+
     runs-on: ${{ matrix.runs_on }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,9 +65,9 @@ jobs:
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
           if [ "${{ matrix.goos }}" = "linux" ]; then
-            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }} ./src/...
+            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }} ./src/...
           else
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
           fi
 
       - name: Upload build artifact
@@ -66,7 +82,7 @@ jobs:
     permissions:
       contents: write
 
-    needs: build
+    needs: [set_tag, build]
 
     steps:
     - name: Checkout code
@@ -80,25 +96,18 @@ jobs:
     - name: Copy LICENSE
       run: cp LICENSE.txt dist/
 
-    - name: Create tag variable
-      id: tag
-      run: |
-        TAG=v$(date +%Y%m%d%H%M)
-        echo "$TAG"
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
-
     - name: Create tag
       uses: rickstaa/action-create-tag@v1
       with:
-        tag: ${{ steps.tag.outputs.tag }}
+        tag: ${{ needs.set_tag.outputs.tag }}
 
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
         files: dist/**/*
         fail_on_unmatched_files: true
-        tag_name: ${{ steps.tag.outputs.tag }}
-        name: chrono-ntp ${{ steps.tag.outputs.tag }}
+        tag_name: ${{ needs.set_tag.outputs.tag }}
+        name: chrono-ntp ${{ needs.set_tag.outputs.tag }}
 
     - name: Release (Raspberry) script
-      run: echo "cd ~/repositories/chrono-ntp && git pull && make build-raspberry-arm64 && gh release upload ${{ steps.tag.outputs.tag }} dist/chrono-ntp-raspberry-arm64"
+      run: echo "cd ~/repositories/chrono-ntp && git pull && mkdir -p dist && rm -f dist/chrono-ntp-raspberry-arm64 && go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-raspberry-arm64 ./src/... && gh release upload ${{ needs.set_tag.outputs.tag }} dist/chrono-ntp-raspberry-arm64"

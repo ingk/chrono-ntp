@@ -13,6 +13,9 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+var appName = "chrono-ntp"
+var appVersion = "dev"
+
 var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
 
 func main() {
@@ -26,7 +29,13 @@ func main() {
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
 	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
+	version := flag.Bool("version", false, "Show version and exit")
 	flag.Parse()
+
+	if *version {
+		fmt.Println(appName, appVersion)
+		return
+	}
 
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
 		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats, ", "))
