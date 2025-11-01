@@ -30,6 +30,7 @@ func main() {
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
 	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	version := flag.Bool("version", false, "Show version and exit")
+	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
 	flag.Parse()
 
 	if *version {
@@ -60,14 +61,23 @@ func main() {
 	centerY := height/2 - 1
 
 	screen.Clear()
-	drawTextCentered(screen, centerY, "Querying NTP server for time...", tcell.StyleDefault.Bold(true))
+	if *offline {
+		drawTextCentered(screen, centerY, "Offline mode: using system time", tcell.StyleDefault.Bold(true))
+	} else {
+		drawTextCentered(screen, centerY, "Querying NTP server for time...", tcell.StyleDefault.Bold(true))
+	}
 	screen.Show()
 
-	ntpTime, err := ntp.Time(*ntpServer)
-	if err != nil {
-		log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
+	var offset time.Duration
+	if *offline {
+		offset = 0
+	} else {
+		ntpTime, err := ntp.Time(*ntpServer)
+		if err != nil {
+			log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
+		}
+		offset = time.Since(ntpTime)
 	}
-	offset := time.Since(ntpTime)
 
 	timeZoneLocation, err := time.LoadLocation(*timeZone)
 	if err != nil {

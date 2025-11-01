@@ -28,6 +28,9 @@ func TestParseConfiguration_Defaults(t *testing.T) {
 	if config.Beeps != false {
 		t.Errorf("expected Beeps false, got %v", config.Beeps)
 	}
+	if config.Offline != false {
+		t.Errorf("expected Offline false, got %v", config.Offline)
+	}
 }
 
 func TestParseConfiguration_Content(t *testing.T) {
@@ -39,6 +42,7 @@ hide-date = true
 show-time-zone = true
 time-format = "12h_AM_PM"
 beeps = true
+offline = true
 `
 	config := parseConfiguration([]byte(tomlContent))
 
@@ -62,5 +66,8 @@ beeps = true
 	}
 	if config.Beeps != true {
 		t.Errorf("expected Beeps true, got %v", config.Beeps)
+	}
+	if config.Offline != true {
+		t.Errorf("expected Offline true, got %v", config.Offline)
 	}
 }

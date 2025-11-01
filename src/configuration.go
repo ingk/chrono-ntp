@@ -20,6 +20,7 @@ type Configuration struct {
 	ShowTimeZone  bool   `toml:"show-time-zone"`
 	TimeFormat    string `toml:"time-format"`
 	Beeps         bool   `toml:"beeps"`
+	Offline       bool   `toml:"offline"`
 }
 
 func getConfigurationContents(path string) []byte {
@@ -43,6 +44,7 @@ func parseConfiguration(data []byte) Configuration {
 		ShowTimeZone:  true,
 		TimeFormat:    defaultTimeFormat,
 		Beeps:         false,
+		Offline:       false,
 	}
 
 	if err := toml.Unmarshal(data, &config); err != nil {
