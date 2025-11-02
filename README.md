@@ -63,6 +63,14 @@ Usage of chrono-ntp:
         Show debug information (e.g. offset from NTP server), then exit
 ```
 
+### Example
+
+```sh
+chrono-ntp -server time.google.com -time-zone Europe/Berlin
+```
+
+![Demo GIF](assets/demo.gif)
+
 ### Configuration File
 
 chrono-ntp supports a configuration file for default values. You can create a TOML file at `~/.chrono-ntp.toml` to specify your preferred options, which will be loaded automatically on startup.
@@ -80,14 +88,6 @@ beeps = true
 ```
 
 Any command-line options will override the values set in the configuration file.
-
-### Example
-
-```sh
-chrono-ntp -server time.google.com -time-zone Europe/Berlin
-```
-
-![Demo GIF](assets/demo.gif)
 
 ## Build from Source
 
