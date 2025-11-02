@@ -71,6 +71,17 @@ chrono-ntp -server time.google.com -time-zone Europe/Berlin
 
 ![Demo GIF](assets/demo.gif)
 
+### Time Format Options
+
+The `-time-format` option (or `time-format` in the configuration file) controls how the time is displayed. The following formats are available:
+
+| Name                                                                       | Configuration Value | Example             |
+|----------------------------------------------------------------------------|---------------------|---------------------|
+| ISO 8601                                                                   | ISO8601             | 14:30:00            |
+| 12-hour                                                                    | 12h                 | 02:30:00            |
+| 12-hour (AM/PM)                                                            | 12h_AM_PM           | 02:30:00 PM         |
+| [Swatch Internet Time](https://en.wikipedia.org/wiki/Swatch_Internet_Time) | .beat               | @625                |
+
 ### Configuration File
 
 chrono-ntp supports a configuration file for default values. You can create a TOML file at `~/.chrono-ntp.toml` to specify your preferred options, which will be loaded automatically on startup.
