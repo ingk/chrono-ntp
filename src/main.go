@@ -106,18 +106,19 @@ func main() {
 		}
 	}()
 
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
+	displayTicker := time.NewTicker(100 * time.Millisecond)
+	defer displayTicker.Stop()
+	audioTicker := time.NewTicker(time.Second)
+	defer audioTicker.Stop()
 
 	for {
 		select {
-		case <-ticker.C:
+		case <-displayTicker.C:
 			screen.Clear()
-
-			now := time.Now().Add(-offset).In(timeZoneLocation)
 
 			_, height := screen.Size()
 			centerY := height/2 - 1
+			now := time.Now().Add(-offset).In(timeZoneLocation)
 
 			drawTextCentered(screen, centerY, formatTime(now, timeFormat), tcell.StyleDefault.Bold(true))
 
@@ -133,7 +134,10 @@ func main() {
 				drawStatusbar(screen)
 			}
 
+			screen.Show()
+		case <-audioTicker.C:
 			if *beeps {
+				now := time.Now().Add(-offset).In(timeZoneLocation)
 				sec := now.Second()
 				if sec >= 55 || sec == 0 {
 					go func(s int) {
@@ -145,8 +149,6 @@ func main() {
 					}(sec)
 				}
 			}
-
-			screen.Show()
 		case <-quitChan:
 			return
 		}
