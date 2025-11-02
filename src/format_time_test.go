@@ -49,4 +49,9 @@ func TestFormatTime(t *testing.T) {
 	if result != "@677" {
 		t.Errorf("Expected '@677', got '%s'", result)
 	}
+
+	result = formatTime(inputTime, sPtr("septimal"))
+	if result != "43 11 52" {
+		t.Errorf("Expected '43 11 52', got '%s'", result)
+	}
 }

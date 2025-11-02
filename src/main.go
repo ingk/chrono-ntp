@@ -16,7 +16,7 @@ import (
 var appName = "chrono-ntp"
 var appVersion = "dev"
 
-var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat"}
+var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal"}
 
 func main() {
 	config := LoadConfiguration()
