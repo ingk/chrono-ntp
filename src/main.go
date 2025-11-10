@@ -15,7 +15,7 @@ import (
 
 var appName = "chrono-ntp"
 var appVersion = "dev"
-
+var ntpOffsetRefreshInterval = 15 * time.Minute
 var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal"}
 
 func main() {
@@ -77,6 +77,18 @@ func main() {
 			log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 		}
 		offset = time.Since(ntpTime)
+
+		go func() {
+			ticker := time.NewTicker(ntpOffsetRefreshInterval)
+			defer ticker.Stop()
+			for range ticker.C {
+				ntpTime, err := ntp.Time(*ntpServer)
+				if err == nil {
+					offset = time.Since(ntpTime)
+				}
+				// If error, ignore and keep previous offset
+			}
+		}()
 	}
 
 	timeZoneLocation, err := time.LoadLocation(*timeZone)

@@ -101,6 +101,10 @@ beeps = true
 
 Any command-line options will override the values set in the configuration file.
 
+### Periodic Offset Refresh
+
+By default, chrono-ntp automatically refreshes its time offset from the NTP server every 15 minutes while running (unless started in offline mode). This ensures the displayed time remains accurate even if your system clock drifts.
+
 ## Build from Source
 
 To build chrono-ntp from source, you will need Go installed (version 1.18 or newer recommended).
