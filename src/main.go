@@ -57,16 +57,13 @@ func main() {
 	}
 	defer screen.Fini()
 
-	_, height := screen.Size()
-	centerY := height/2 - 1
+	display := NewDisplay(screen)
 
-	screen.Clear()
 	if *offline {
-		drawTextCentered(screen, centerY, "Offline mode: using system time", tcell.StyleDefault.Bold(true))
+		display.SetInitText("Offline mode: using system time")
 	} else {
-		drawTextCentered(screen, centerY, "Querying NTP server for time...", tcell.StyleDefault.Bold(true))
+		display.SetInitText("Querying NTP server for time...")
 	}
-	screen.Show()
 
 	var offset time.Duration
 	if *offline {
@@ -126,27 +123,15 @@ func main() {
 	for {
 		select {
 		case <-displayTicker.C:
-			screen.Clear()
-
-			_, height := screen.Size()
-			centerY := height/2 - 1
-			now := time.Now().Add(-offset).In(timeZoneLocation)
-
-			drawTextCentered(screen, centerY, formatTime(now, timeFormat), tcell.StyleDefault.Bold(true))
-
-			if !*hideDate {
-				drawTextCentered(screen, centerY-1, formatDate(now), tcell.StyleDefault)
+			displayState := DisplayState{
+				Now:           time.Now().Add(-offset).In(timeZoneLocation),
+				TimeFormat:    *timeFormat,
+				HideDate:      *hideDate,
+				ShowTimeZone:  *showTimeZone,
+				HideStatusbar: *hideStatusbar,
+				TimeZone:      timeZoneLocation,
 			}
-
-			if *showTimeZone {
-				drawTextCentered(screen, centerY+1, normalizeTimezoneName(timeZoneLocation), tcell.StyleDefault)
-			}
-
-			if !*hideStatusbar {
-				drawStatusbar(screen)
-			}
-
-			screen.Show()
+			display.Update(displayState)
 		case <-audioTicker.C:
 			if *beeps {
 				now := time.Now().Add(-offset).In(timeZoneLocation)
