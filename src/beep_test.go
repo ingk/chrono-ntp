@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 const testDurationMs = 100
 
@@ -18,6 +21,26 @@ func TestMakeSineWaveTable_Range(t *testing.T) {
 		v := int16(testSineWaveTable[i]) | int16(testSineWaveTable[i+1])<<8
 		if v < -maxInt16 || v > maxInt16 {
 			t.Errorf("sample out of range: %d", v)
+		}
+	}
+}
+
+func TestShouldBeep(t *testing.T) {
+	tests := []struct {
+		sec        int
+		shouldBeep bool
+	}{
+		{0, true},
+		{1, false},
+		{30, false},
+		{54, false},
+		{55, true},
+		{59, true},
+	}
+	for _, tt := range tests {
+		tm := time.Date(2025, 11, 11, 12, 0, tt.sec, 0, time.UTC)
+		if got := ShouldBeep(tm); got != tt.shouldBeep {
+			t.Errorf("ShouldBeep(%d) = %v; want %v", tt.sec, got, tt.shouldBeep)
 		}
 	}
 }

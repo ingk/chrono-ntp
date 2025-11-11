@@ -135,17 +135,18 @@ func main() {
 		case <-audioTicker.C:
 			if *beeps {
 				now := time.Now().Add(-offset).In(timeZoneLocation)
-				sec := now.Second()
-				if sec >= 55 || sec == 0 {
-					go func(s int) {
-						if s == 0 {
+				if ShouldBeep(now) {
+					go func(n time.Time) {
+						sec := now.Second()
+						if sec == 0 {
 							PlayLongBeep(audioContext)
 						} else {
 							PlayShortBeep(audioContext)
 						}
-					}(sec)
+					}(now)
 				}
 			}
+
 		case <-quitChan:
 			return
 		}

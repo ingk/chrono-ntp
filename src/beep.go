@@ -84,3 +84,8 @@ func PlayShortBeep(ctx *oto.Context) {
 func PlayLongBeep(ctx *oto.Context) {
 	playBeep(ctx, longBeep, longMs)
 }
+
+func ShouldBeep(now time.Time) bool {
+	sec := now.Second()
+	return sec >= 55 || sec == 0
+}
