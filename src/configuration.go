@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
@@ -23,19 +22,15 @@ type Configuration struct {
 	Offline       bool   `toml:"offline"`
 }
 
-func getConfigurationContents(path string) []byte {
-	if _, err := os.Stat(path); err == nil {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			log.Fatalf("Failed to read config file %s: %v", path, err)
-		}
-		return data
+func getConfigurationContents(path string) ([]byte, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return os.ReadFile(path)
 	}
-
-	return nil
+	return nil, err
 }
 
-func parseConfiguration(data []byte) Configuration {
+func parseConfiguration(data []byte) (Configuration, error) {
 	config := Configuration{
 		Server:        defaultNtpServer,
 		TimeZone:      defaultTimeZone,
@@ -47,15 +42,18 @@ func parseConfiguration(data []byte) Configuration {
 		Offline:       false,
 	}
 
-	if err := toml.Unmarshal(data, &config); err != nil {
-		log.Fatalf("Failed to parse config file: %v", err)
+	err := toml.Unmarshal(data, &config)
+	if err != nil {
+		return Configuration{}, err
 	}
-
-	return config
+	return config, nil
 }
 
-func LoadConfiguration() Configuration {
+func LoadConfiguration() (Configuration, error) {
 	configPath := filepath.Join(os.Getenv("HOME"), ".chrono-ntp.toml")
-	data := getConfigurationContents(configPath)
+	data, err := getConfigurationContents(configPath)
+	if err != nil {
+		return Configuration{}, err
+	}
 	return parseConfiguration(data)
 }

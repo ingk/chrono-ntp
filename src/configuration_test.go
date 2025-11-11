@@ -1,11 +1,13 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestParseConfiguration_Defaults(t *testing.T) {
-	config := parseConfiguration(nil)
+	config, _ := parseConfiguration(nil)
 
 	if config.Server != "time.google.com" {
 		t.Errorf("expected Server %q, got %q", "time.google.com", config.Server)
@@ -44,7 +46,7 @@ time-format = "12h_AM_PM"
 beeps = true
 offline = true
 `
-	config := parseConfiguration([]byte(tomlContent))
+	config, _ := parseConfiguration([]byte(tomlContent))
 
 	if config.Server != "pool.example-time-server.org" {
 		t.Errorf("expected Server 'pool.example-time-server.org', got %q", config.Server)
@@ -69,5 +71,68 @@ offline = true
 	}
 	if config.Offline != true {
 		t.Errorf("expected Offline true, got %v", config.Offline)
+	}
+}
+
+func TestLoadConfiguration(t *testing.T) {
+	// Create a temporary directory to act as HOME
+	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Set HOME to the temp directory
+	oldHome := os.Getenv("HOME")
+	os.Setenv("HOME", tempDir)
+	defer os.Setenv("HOME", oldHome)
+
+	// Write a config file in the temp HOME
+	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
+	tomlContent := `
+server = "mocked.server"
+time-zone = "UTC"
+`
+	if err := os.WriteFile(configPath, []byte(tomlContent), 0644); err != nil {
+		t.Fatalf("Failed to write mock config: %v", err)
+	}
+
+	config, err := LoadConfiguration()
+
+	if err != nil {
+		t.Errorf("unexpected error', got %v", err)
+	}
+	if config.Server != "mocked.server" {
+		t.Errorf("expected Server 'mocked.server', got %q", config.Server)
+	}
+	if config.TimeZone != "UTC" {
+		t.Errorf("expected TimeZone 'UTC', got %q", config.TimeZone)
+	}
+}
+
+func TestLoadConfiguration_Error(t *testing.T) {
+	// Create a temporary directory to act as HOME
+	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Set HOME to the temp directory
+	oldHome := os.Getenv("HOME")
+	os.Setenv("HOME", tempDir)
+	defer os.Setenv("HOME", oldHome)
+
+	// Write a config file in the temp HOME
+	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
+	tomlContent := `invalid-toml`
+	if err := os.WriteFile(configPath, []byte(tomlContent), 0644); err != nil {
+		t.Fatalf("Failed to write mock config: %v", err)
+	}
+
+	config, err := LoadConfiguration()
+
+	if err == nil {
+		t.Errorf("expected error, got %v", config)
 	}
 }

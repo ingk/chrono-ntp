@@ -19,7 +19,10 @@ var ntpOffsetRefreshInterval = 15 * time.Minute
 var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal"}
 
 func main() {
-	config := LoadConfiguration()
+	config, err := LoadConfiguration()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
 
 	ntpServer := flag.String("server", config.Server, "NTP server to synchronize time from")
 	timeZone := flag.String("time-zone", config.TimeZone, "Time zone name (e.g., 'America/New_York')")
