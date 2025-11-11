@@ -120,8 +120,6 @@ func main() {
 
 	displayTicker := time.NewTicker(100 * time.Millisecond)
 	defer displayTicker.Stop()
-	audioTicker := time.NewTicker(time.Second)
-	defer audioTicker.Stop()
 
 	for {
 		select {
@@ -135,16 +133,11 @@ func main() {
 				TimeZone:      timeZoneLocation,
 			}
 			display.Update(displayState)
-		case <-audioTicker.C:
+
 			if *beeps {
 				now := time.Now().Add(-offset).In(timeZoneLocation)
-				if ShouldBeep(now) {
-					go func(n time.Time) {
-						PlayBeep(audioContext, now)
-					}(now)
-				}
+				Tick(audioContext, now)
 			}
-
 		case <-quitChan:
 			return
 		}

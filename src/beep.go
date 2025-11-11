@@ -20,8 +20,9 @@ const (
 )
 
 var (
-	shortBeep []byte
-	longBeep  []byte
+	shortBeep     []byte
+	longBeep      []byte
+	currentSecond int
 )
 
 func init() {
@@ -43,13 +44,20 @@ func InitializeAudioContext() (*oto.Context, error) {
 	return ctx, nil
 }
 
-func PlayBeep(ctx *oto.Context, now time.Time) {
-	sec := now.Second()
-	if sec == 0 {
-		playBeep(ctx, longBeep, longMs)
-	} else {
-		playBeep(ctx, shortBeep, shortMs)
+func Tick(ctx *oto.Context, now time.Time) {
+	if !ShouldBeep(now) || currentSecond == now.Second() {
+		return
 	}
+
+	currentSecond = now.Second()
+
+	go func(n time.Time) {
+		if currentSecond == 0 {
+			playBeep(ctx, longBeep, longMs)
+		} else {
+			playBeep(ctx, shortBeep, shortMs)
+		}
+	}(now)
 }
 
 func ShouldBeep(now time.Time) bool {
