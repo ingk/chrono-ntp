@@ -50,6 +50,12 @@ func TestFormatTime(t *testing.T) {
 		t.Errorf("Expected '@677', got '%s'", result)
 	}
 
+	// Test .beat with zero padding
+	result = formatTime(time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC), sPtr(".beat"))
+	if result != "@041" {
+		t.Errorf("Expected '@041', got '%s'", result)
+	}
+
 	result = formatTime(inputTime, sPtr("septimal"))
 	if result != "43 11 52" {
 		t.Errorf("Expected '43 11 52', got '%s'", result)
