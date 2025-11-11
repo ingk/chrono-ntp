@@ -140,12 +140,7 @@ func main() {
 				now := time.Now().Add(-offset).In(timeZoneLocation)
 				if ShouldBeep(now) {
 					go func(n time.Time) {
-						sec := now.Second()
-						if sec == 0 {
-							PlayLongBeep(audioContext)
-						} else {
-							PlayShortBeep(audioContext)
-						}
+						PlayBeep(audioContext, now)
 					}(now)
 				}
 			}

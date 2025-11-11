@@ -29,6 +29,42 @@ func init() {
 	longBeep = makeSineWaveTable(longMs)
 }
 
+func InitializeAudioContext() (*oto.Context, error) {
+	op := &oto.NewContextOptions{
+		SampleRate:   sampleRate,
+		ChannelCount: channelCount,
+		Format:       oto.FormatSignedInt16LE,
+	}
+	ctx, ready, err := oto.NewContext(op)
+	if err != nil {
+		return nil, err
+	}
+	<-ready
+	return ctx, nil
+}
+
+func PlayBeep(ctx *oto.Context, now time.Time) {
+	sec := now.Second()
+	if sec == 0 {
+		playBeep(ctx, longBeep, longMs)
+	} else {
+		playBeep(ctx, shortBeep, shortMs)
+	}
+}
+
+func ShouldBeep(now time.Time) bool {
+	sec := now.Second()
+	return sec >= 55 || sec == 0
+}
+
+func playBeep(ctx *oto.Context, data []byte, durationMs int) {
+	reader := &beepReader{data: data}
+	player := ctx.NewPlayer(reader)
+	player.Play()
+	time.Sleep(time.Duration(durationMs) * time.Millisecond)
+	runtime.KeepAlive(player)
+}
+
 func makeSineWaveTable(durationMs int) []byte {
 	numSamples := sampleRate * durationMs / 1000
 	buf := make([]byte, numSamples*2) // 2 bytes per sample
@@ -53,39 +89,4 @@ func (r *beepReader) Read(buf []byte) (int, error) {
 	n := copy(buf, r.data[r.pos:])
 	r.pos += n
 	return n, nil
-}
-
-func playBeep(ctx *oto.Context, data []byte, durationMs int) {
-	reader := &beepReader{data: data}
-	player := ctx.NewPlayer(reader)
-	player.Play()
-	time.Sleep(time.Duration(durationMs) * time.Millisecond)
-	runtime.KeepAlive(player)
-}
-
-func InitializeAudioContext() (*oto.Context, error) {
-	op := &oto.NewContextOptions{
-		SampleRate:   sampleRate,
-		ChannelCount: channelCount,
-		Format:       oto.FormatSignedInt16LE,
-	}
-	ctx, ready, err := oto.NewContext(op)
-	if err != nil {
-		return nil, err
-	}
-	<-ready
-	return ctx, nil
-}
-
-func PlayShortBeep(ctx *oto.Context) {
-	playBeep(ctx, shortBeep, shortMs)
-}
-
-func PlayLongBeep(ctx *oto.Context) {
-	playBeep(ctx, longBeep, longMs)
-}
-
-func ShouldBeep(now time.Time) bool {
-	sec := now.Second()
-	return sec >= 55 || sec == 0
 }
