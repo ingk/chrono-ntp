@@ -46,7 +46,8 @@ func main() {
 	}
 
 	if *debug {
-		log.Printf("NTP server: %s", *ntpServer)
+		log.Printf("Version: %s", appVersion)
+		log.Printf("Configuration: %+v", config)
 		return
 	}
 
