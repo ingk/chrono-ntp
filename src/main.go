@@ -13,10 +13,13 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-var appName = "chrono-ntp"
-var appVersion = "dev"
-var ntpOffsetRefreshInterval = 15 * time.Minute
-var allowedTimeFormats = []string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal"}
+const (
+	appName                  = "chrono-ntp"
+	appVersion               = "dev"
+	ntpOffsetRefreshInterval = 15 * time.Minute
+)
+
+var allowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal"}
 
 func main() {
 	config, err := LoadConfiguration()
@@ -30,7 +33,7 @@ func main() {
 	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the date display")
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
-	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
+	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats[:], ", ")))
 	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	version := flag.Bool("version", false, "Show version and exit")
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
@@ -41,14 +44,24 @@ func main() {
 		return
 	}
 
-	if !slices.Contains(allowedTimeFormats, *timeFormat) {
-		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats, ", "))
+	if !slices.Contains(allowedTimeFormats[:], *timeFormat) {
+		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats[:], ", "))
 	}
 
 	if *debug {
 		log.Printf("Version: %s", appVersion)
 		log.Printf("Configuration: %+v", config)
 		return
+	}
+
+	timeZoneLocation, err := time.LoadLocation(*timeZone)
+	if err != nil {
+		log.Fatalf("Failed to load location: %v", err)
+	}
+
+	audioContext, err := InitializeAudioContext()
+	if err != nil {
+		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
 
 	// Initialize screen early to show loading message
@@ -90,16 +103,6 @@ func main() {
 				// If error, ignore and keep previous offset
 			}
 		}()
-	}
-
-	timeZoneLocation, err := time.LoadLocation(*timeZone)
-	if err != nil {
-		log.Fatalf("Failed to load location: %v", err)
-	}
-
-	audioContext, err := InitializeAudioContext()
-	if err != nil {
-		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
 
 	quitChan := make(chan struct{})
