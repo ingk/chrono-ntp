@@ -140,7 +140,7 @@ func main() {
 
 			if *beeps {
 				now := time.Now().Add(-offset).In(timeZoneLocation)
-				Tick(audioContext, now)
+				BeepTick(audioContext, now)
 			}
 		case <-quitChan:
 			return

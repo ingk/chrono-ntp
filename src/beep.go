@@ -44,23 +44,23 @@ func InitializeAudioContext() (*oto.Context, error) {
 	return ctx, nil
 }
 
-func Tick(ctx *oto.Context, now time.Time) {
-	if !ShouldBeep(now) || currentSecond == now.Second() {
+func BeepTick(ctx *oto.Context, now time.Time) {
+	if !shouldBeep(now) || currentSecond == now.Second() {
 		return
 	}
 
 	currentSecond = now.Second()
 
-	go func(n time.Time) {
+	go func(currentSecond int) {
 		if currentSecond == 0 {
 			playBeep(ctx, longBeep, longMs)
 		} else {
 			playBeep(ctx, shortBeep, shortMs)
 		}
-	}(now)
+	}(currentSecond)
 }
 
-func ShouldBeep(now time.Time) bool {
+func shouldBeep(now time.Time) bool {
 	sec := now.Second()
 	return sec >= 55 || sec == 0
 }

@@ -39,7 +39,7 @@ func TestShouldBeep(t *testing.T) {
 	}
 	for _, tt := range tests {
 		tm := time.Date(2025, 11, 11, 12, 0, tt.sec, 0, time.UTC)
-		if got := ShouldBeep(tm); got != tt.shouldBeep {
+		if got := shouldBeep(tm); got != tt.shouldBeep {
 			t.Errorf("ShouldBeep(%d) = %v; want %v", tt.sec, got, tt.shouldBeep)
 		}
 	}
