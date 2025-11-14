@@ -39,6 +39,12 @@ func main() {
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
 	flag.Parse()
 
+	if *debug {
+		fmt.Printf("Version: %s\n", appVersion)
+		fmt.Printf("Configuration: %+v\n", config)
+		return
+	}
+
 	if *version {
 		fmt.Println(appName, appVersion)
 		return
@@ -46,12 +52,6 @@ func main() {
 
 	if !slices.Contains(allowedTimeFormats[:], *timeFormat) {
 		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats[:], ", "))
-	}
-
-	if *debug {
-		log.Printf("Version: %s", appVersion)
-		log.Printf("Configuration: %+v", config)
-		return
 	}
 
 	timeZoneLocation, err := time.LoadLocation(*timeZone)
