@@ -4,12 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/beevik/ntp"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -82,23 +80,23 @@ func main() {
 		display.SetInitText("Querying NTP server for time...")
 	}
 
+	var ntp *Ntp
 	var offset time.Duration
 	if *offline {
 		offset = 0
 	} else {
-		ntpTime, err := ntp.Time(*ntpServer)
+		ntp, err = NewNtp(*ntpServer)
 		if err != nil {
 			log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 		}
-		offset = time.Since(ntpTime)
+		offset = ntp.Offset()
 
 		go func() {
 			ticker := time.NewTicker(ntpOffsetRefreshInterval)
 			defer ticker.Stop()
 			for range ticker.C {
-				ntpTime, err := ntp.Time(*ntpServer)
-				if err == nil {
-					offset = time.Since(ntpTime)
+				if err := ntp.Refresh(); err == nil {
+					offset = ntp.Offset()
 				}
 				// If error, ignore and keep previous offset
 			}
@@ -114,8 +112,10 @@ func main() {
 	for {
 		select {
 		case <-displayTicker.C:
+			now := time.Now().Add(-offset).In(timeZoneLocation)
+
 			displayState := DisplayState{
-				Now:           time.Now().Add(-offset).In(timeZoneLocation),
+				Now:           now,
 				TimeFormat:    *timeFormat,
 				HideDate:      *hideDate,
 				ShowTimeZone:  *showTimeZone,
@@ -125,7 +125,6 @@ func main() {
 			display.Update(displayState)
 
 			if *beeps {
-				now := time.Now().Add(-offset).In(timeZoneLocation)
 				BeepTick(audioContext, now)
 			}
 		case <-quitChan:
