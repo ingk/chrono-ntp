@@ -106,21 +106,7 @@ func main() {
 	}
 
 	quitChan := make(chan struct{})
-
-	go func() {
-		for {
-			ev := screen.PollEvent()
-			switch tev := ev.(type) {
-			case *tcell.EventKey:
-				if tev.Key() == tcell.KeyCtrlC || slices.Contains([]rune{'q', 'Q'}, tev.Rune()) {
-					quitChan <- struct{}{}
-					return
-				}
-			case *tcell.EventResize:
-				screen.Sync()
-			}
-		}
-	}()
+	go display.PollEvents(quitChan)
 
 	displayTicker := time.NewTicker(100 * time.Millisecond)
 	defer displayTicker.Stop()

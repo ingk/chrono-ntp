@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -21,6 +22,21 @@ type Display struct {
 
 func NewDisplay(screen tcell.Screen) *Display {
 	return &Display{screen: screen}
+}
+
+func (d *Display) PollEvents(quitChan chan<- struct{}) {
+	for {
+		ev := d.screen.PollEvent()
+		switch tev := ev.(type) {
+		case *tcell.EventKey:
+			if tev.Key() == tcell.KeyCtrlC || slices.Contains([]rune{'q', 'Q'}, tev.Rune()) {
+				quitChan <- struct{}{}
+				return
+			}
+		case *tcell.EventResize:
+			d.screen.Sync()
+		}
+	}
 }
 
 func (d *Display) SetInitText(text string) {
