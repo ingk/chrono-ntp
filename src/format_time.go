@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -66,9 +65,4 @@ func leftPadInt(n int, width int) string {
 		s = "0" + s
 	}
 	return s
-}
-
-func normalizeTimezoneName(location *time.Location) string {
-	// Replace underscores with spaces for better readability
-	return strings.ReplaceAll(location.String(), "_", " ")
 }

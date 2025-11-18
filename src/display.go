@@ -2,6 +2,7 @@ package main
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -69,4 +70,9 @@ func (d *Display) Update(state DisplayState) {
 	}
 
 	d.screen.Show()
+}
+
+func normalizeTimezoneName(location *time.Location) string {
+	// Replace underscores with spaces for better readability
+	return strings.ReplaceAll(location.String(), "_", " ")
 }
