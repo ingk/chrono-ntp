@@ -50,7 +50,7 @@ Usage of chrono-ntp:
   -show-time-zone
         Show the time zone below time
   -time-format string
-        Format for displaying time (ISO8601, 12h, 12h_AM_PM, .beat, septimal) (default "ISO8601")
+        Time display format (ISO8601, 12h, 12h_AM_PM, .beat, septimal, mars, lunar) (default "ISO8601")
   -hide-date
         Hide the current date
   -hide-statusbar
@@ -75,13 +75,15 @@ chrono-ntp -server time.google.com -time-zone Europe/Berlin
 
 The `-time-format` option (or `time-format` in the [configuration file](#configuration-file)) controls how the time is displayed. The following formats are available:
 
-| Name                                                                       | Configuration Value | Example     |
-|----------------------------------------------------------------------------|---------------------|-------------|
-| ISO 8601                                                                   | ISO8601             | 14:30:00    |
-| 12-hour                                                                    | 12h                 | 02:30:00    |
-| 12-hour (AM/PM)                                                            | 12h_AM_PM           | 02:30:00 PM |
-| [Swatch Internet Time](https://en.wikipedia.org/wiki/Swatch_Internet_Time) | .beat               | @625        |
-| [Septimal Time](http://the-light.com/cal/veseptimal.html) (base-7 pairs)   | septimal            | 43 11 52    |
+| Name                                                                                  | Configuration Value | Example     |
+|---------------------------------------------------------------------------------------|---------------------|-------------|
+| ISO 8601                                                                              | ISO8601             | 14:30:00    |
+| 12-hour                                                                               | 12h                 | 02:30:00    |
+| 12-hour (AM/PM)                                                                       | 12h_AM_PM           | 02:30:00 PM |
+| [Swatch Internet Time](https://en.wikipedia.org/wiki/Swatch_Internet_Time)            | .beat               | @625        |
+| [Septimal Time](http://the-light.com/cal/veseptimal.html) (base-7 pairs)              | septimal            | 43 11 52    |
+| [Coordinated Mars Time (MTC)](https://en.wikipedia.org/wiki/Timekeeping_on_Mars)      | mars                | 12:34:56    |
+| [Coordinated Lunar Time (LTC)](https://en.wikipedia.org/wiki/Timekeeping_on_the_Moon) | lunar               | 12:34:56    |
 
 ### Configuration File
 

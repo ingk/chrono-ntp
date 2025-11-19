@@ -55,14 +55,23 @@ func (d *Display) Update(state DisplayState) {
 	_, height := d.screen.Size()
 	centerY := height/2 - 1
 
-	drawTextCentered(d.screen, centerY, formatTime(state.Now, &state.TimeFormat), tcell.StyleDefault.Bold(true))
+	drawTextCentered(d.screen, centerY, FormatTime(state.Now, &state.TimeFormat), tcell.StyleDefault.Bold(true))
 
 	if !state.HideDate {
-		drawTextCentered(d.screen, centerY-1, formatDate(state.Now), tcell.StyleDefault)
+		drawTextCentered(d.screen, centerY-1, FormatDate(state.Now), tcell.StyleDefault)
 	}
 
 	if state.ShowTimeZone {
-		drawTextCentered(d.screen, centerY+1, normalizeTimezoneName(state.TimeZone), tcell.StyleDefault)
+		var timeZoneLabel string
+		switch state.TimeFormat {
+		case "mars":
+			timeZoneLabel = "Coordinated Mars Time"
+		case "lunar":
+			timeZoneLabel = "Coordinated Lunar Time"
+		default:
+			timeZoneLabel = normalizeTimeZoneName(state.TimeZone)
+		}
+		drawTextCentered(d.screen, centerY+1, timeZoneLabel, tcell.StyleDefault)
 	}
 
 	if !state.HideStatusbar {
@@ -72,7 +81,7 @@ func (d *Display) Update(state DisplayState) {
 	d.screen.Show()
 }
 
-func normalizeTimezoneName(location *time.Location) string {
+func normalizeTimeZoneName(location *time.Location) string {
 	// Replace underscores with spaces for better readability
 	return strings.ReplaceAll(location.String(), "_", " ")
 }

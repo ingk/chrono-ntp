@@ -17,7 +17,7 @@ const (
 	ntpOffsetRefreshInterval = 15 * time.Minute
 )
 
-var allowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal"}
+var allowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal", "mars", "lunar"}
 
 func main() {
 	config, err := LoadConfiguration()
@@ -124,7 +124,7 @@ func main() {
 			}
 			display.Update(displayState)
 
-			if *beeps {
+			if *beeps && !slices.Contains([]string{"lunar", "mars"}, *timeFormat) {
 				BeepTick(audioContext, now)
 			}
 		case <-quitChan:

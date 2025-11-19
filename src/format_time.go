@@ -5,16 +5,20 @@ import (
 	"time"
 )
 
-func formatDate(t time.Time) string {
+func FormatDate(t time.Time) string {
 	return t.Format(time.DateOnly)
 }
 
-func formatTime(t time.Time, timeFormat *string) string {
+func FormatTime(t time.Time, timeFormat *string) string {
 	switch *timeFormat {
 	case ".beat":
 		return formatBeatTime(t)
 	case "septimal":
 		return formatSeptimalTime(t)
+	case "mars":
+		return formatMarsTime(t)
+	case "lunar":
+		return formatLunarTime(t)
 	default:
 		timeFormatMap := map[string]string{
 			"ISO8601":   "15:04:05",
@@ -23,6 +27,52 @@ func formatTime(t time.Time, timeFormat *string) string {
 		}
 		return t.Format(timeFormatMap[*timeFormat])
 	}
+}
+
+// formatMarsTime returns Coordinated Mars Time (MTC)
+// See: https://en.wikipedia.org/wiki/Timekeeping_on_Mars
+func formatMarsTime(t time.Time) string {
+	// Julian Date (UTC)
+	y, m, d := t.UTC().Date()
+	h, min, s := t.UTC().Clock()
+	ms := t.UTC().Nanosecond() / 1e6
+
+	if m <= 2 {
+		y -= 1
+		m += 12
+	}
+	A := y / 100
+	B := 2 - A + A/4
+	jd := 365.25*float64(y+4716) + 30.6001*float64(m+1) + float64(d) + float64(B) - 1524.5
+	fracDay := (float64(h) + float64(min)/60 + float64(s)/3600 + float64(ms)/3600000) / 24.0
+	JD := jd + fracDay
+
+	// Mars Sol Date (MSD)
+	MSD := (JD - 2405522.0028779) / 1.0274912517
+	mtc := 24.0 * (MSD - float64(int(MSD)))
+	hh := int(mtc)
+	mm := int((mtc - float64(hh)) * 60)
+	ss := int((((mtc - float64(hh)) * 60) - float64(mm)) * 60)
+	return fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss)
+}
+
+// formatLunarTime returns Coordinated Lunar Time (LTC)
+// See: https://en.wikipedia.org/wiki/Timekeeping_on_the_Moon
+func formatLunarTime(t time.Time) string {
+	// Reference epoch: 2000-01-06 18:14 UTC (known new moon, J2000)
+	reference := time.Date(2000, 1, 6, 18, 14, 0, 0, time.UTC)
+	lunarDay := 29.530589 * 86400 // seconds in a lunar day
+	delta := t.UTC().Sub(reference).Seconds()
+	lunarDays := delta / lunarDay
+	fraction := lunarDays - float64(int(lunarDays))
+	if fraction < 0 {
+		fraction += 1
+	}
+	totalSeconds := fraction * lunarDay
+	hh := int(totalSeconds / 3600)
+	mm := int((totalSeconds - float64(hh*3600)) / 60)
+	ss := int(totalSeconds) % 60
+	return fmt.Sprintf("%02d:%02d:%02d", hh, mm, ss)
 }
 
 // formatSeptimalTime returns the time in septimal format (base-7 pairs)
