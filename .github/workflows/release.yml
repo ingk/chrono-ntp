@@ -65,9 +65,9 @@ jobs:
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
           if [ "${{ matrix.goos }}" = "linux" ]; then
-            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }} ./src/...
+            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }} main.go
           else
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT ./src/...
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags="-X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.goos }}-${{ matrix.goarch }}$EXT main.go
           fi
 
       - name: Upload build artifact
@@ -110,4 +110,4 @@ jobs:
         name: chrono-ntp ${{ needs.set_tag.outputs.tag }}
 
     - name: Release (Raspberry) script
-      run: echo "cd ~/repositories/chrono-ntp && git pull && mkdir -p dist && rm -f dist/chrono-ntp-raspberry-arm64 && go build -ldflags=\"-X main.appVersion=${{ needs.set_tag.outputs.tag }}\" -o dist/chrono-ntp-raspberry-arm64 ./src/... && gh release upload ${{ needs.set_tag.outputs.tag }} dist/chrono-ntp-raspberry-arm64"
+      run: echo "cd ~/repositories/chrono-ntp && git pull && mkdir -p dist && rm -f dist/chrono-ntp-raspberry-arm64 && go build -ldflags=\"-X main.appVersion=${{ needs.set_tag.outputs.tag }}\" -o dist/chrono-ntp-raspberry-arm64 main.go && gh release upload ${{ needs.set_tag.outputs.tag }} dist/chrono-ntp-raspberry-arm64"

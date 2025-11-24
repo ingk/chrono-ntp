@@ -1,4 +1,4 @@
-package main
+package display
 
 import (
 	"slices"
@@ -7,6 +7,10 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 )
+
+func NewScreen() (tcell.Screen, error) {
+	return tcell.NewScreen()
+}
 
 type DisplayState struct {
 	Now           time.Time

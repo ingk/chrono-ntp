@@ -31,7 +31,7 @@ jobs:
         run: sudo apt install -y libasound2-dev
 
       - name: Test
-        run: go test ./src/...
+        run: go test ./...
 
       - name: Static Analysis
         uses: dominikh/staticcheck-action@v1
@@ -46,7 +46,7 @@ jobs:
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
           if [ "${{ matrix.goos }}" = "linux" ]; then
-            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp ./src/...
+            CGO_ENABLED=1 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp main.go
           else
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp$EXT ./src/...
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/chrono-ntp$EXT main.go
           fi

@@ -8,7 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell/v2"
+	"chrono-ntp/audio"
+	"chrono-ntp/configuration"
+	"chrono-ntp/display"
+	"chrono-ntp/ntp"
 )
 
 const (
@@ -20,7 +23,7 @@ const (
 var allowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal", "mars", "lunar"}
 
 func main() {
-	config, err := LoadConfiguration()
+	config, err := configuration.LoadConfiguration()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
@@ -36,6 +39,8 @@ func main() {
 	version := flag.Bool("version", false, "Show version and exit")
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
 	flag.Parse()
+
+	beepsEnabled := *beeps && !slices.Contains([]string{"lunar", "mars"}, *timeFormat)
 
 	if *debug {
 		fmt.Printf("Version: %s\n", appVersion)
@@ -57,13 +62,13 @@ func main() {
 		log.Fatalf("Failed to load location: %v", err)
 	}
 
-	audioContext, err := InitializeAudioContext()
+	audioContext, err := audio.InitializeAudioContext()
 	if err != nil {
 		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
 
 	// Initialize screen early to show loading message
-	screen, err := tcell.NewScreen()
+	screen, err := display.NewScreen()
 	if err != nil {
 		log.Fatalf("Failed to create screen: %v", err)
 	}
@@ -72,31 +77,31 @@ func main() {
 	}
 	defer screen.Fini()
 
-	display := NewDisplay(screen)
+	d := display.NewDisplay(screen)
 
 	if *offline {
-		display.SetInitText("Offline mode: using system time")
+		d.SetInitText("Offline mode: using system time")
 	} else {
-		display.SetInitText("Querying NTP server for time...")
+		d.SetInitText("Querying NTP server for time...")
 	}
 
-	var ntp *Ntp
+	var ntpClient *ntp.Ntp
 	var offset time.Duration
 	if *offline {
 		offset = 0
 	} else {
-		ntp, err = NewNtp(*ntpServer)
+		ntpClient, err = ntp.NewNtp(*ntpServer)
 		if err != nil {
 			log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 		}
-		offset = ntp.Offset()
+		offset = ntpClient.Offset()
 
 		go func() {
 			ticker := time.NewTicker(ntpOffsetRefreshInterval)
 			defer ticker.Stop()
 			for range ticker.C {
-				if err := ntp.Refresh(); err == nil {
-					offset = ntp.Offset()
+				if err := ntpClient.Refresh(); err == nil {
+					offset = ntpClient.Offset()
 				}
 				// If error, ignore and keep previous offset
 			}
@@ -104,7 +109,7 @@ func main() {
 	}
 
 	quitChan := make(chan struct{})
-	go display.PollEvents(quitChan)
+	go d.PollEvents(quitChan)
 
 	displayTicker := time.NewTicker(100 * time.Millisecond)
 	defer displayTicker.Stop()
@@ -114,7 +119,7 @@ func main() {
 		case <-displayTicker.C:
 			now := time.Now().Add(-offset).In(timeZoneLocation)
 
-			displayState := DisplayState{
+			displayState := &display.DisplayState{
 				Now:           now,
 				TimeFormat:    *timeFormat,
 				HideDate:      *hideDate,
@@ -122,10 +127,10 @@ func main() {
 				HideStatusbar: *hideStatusbar,
 				TimeZone:      timeZoneLocation,
 			}
-			display.Update(displayState)
+			d.Update(*displayState)
 
-			if *beeps && !slices.Contains([]string{"lunar", "mars"}, *timeFormat) {
-				BeepTick(audioContext, now)
+			if beepsEnabled {
+				audio.BeepTick(audioContext, now)
 			}
 		case <-quitChan:
 			return

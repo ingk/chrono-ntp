@@ -5,13 +5,13 @@ APP_NAME = chrono-ntp
 all: test build
 
 test:
-	go test ./src/...
+	go test ./...
 
 build:
-	go build -o $(APP_NAME) ./src/...
+	go build -o $(APP_NAME) main.go
 
 run:
-	go run ./src/... --server=time.google.com
+	go run ./... --server=time.google.com
 
 clean:
 	rm -f $(APP_NAME)
