@@ -24,7 +24,10 @@ type Configuration struct {
 
 func getConfigurationContents(path string) ([]byte, error) {
 	_, err := os.Stat(path)
-	if err == nil {
+
+	if os.IsNotExist(err) {
+		return nil, nil
+	} else if err == nil {
 		return os.ReadFile(path)
 	}
 	return nil, err

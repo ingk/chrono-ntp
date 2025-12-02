@@ -136,3 +136,23 @@ func TestLoadConfiguration_Error(t *testing.T) {
 		t.Errorf("expected error, got %v", config)
 	}
 }
+
+func TestLoadConfiguration_MissingFile(t *testing.T) {
+	// Create a temporary directory to act as HOME
+	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Set HOME to the temp directory
+	oldHome := os.Getenv("HOME")
+	os.Setenv("HOME", tempDir)
+	defer os.Setenv("HOME", oldHome)
+
+	_, configErr := LoadConfiguration()
+
+	if configErr != nil {
+		t.Errorf("did not expect error, got %v", configErr)
+	}
+}
