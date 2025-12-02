@@ -59,6 +59,13 @@ jobs:
         if: ${{ matrix.goos == 'linux' }}
         run: sudo apt install -y libasound2-dev
 
+      - name: Static Analysis
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "2025.1.1"
+          install-go: false
+          cache-key: ${{ matrix.goos }}${{ matrix.goarch }}${{ env.GO_VERSION }}
+
       - name: Build
         run: |
           mkdir -p dist
