@@ -4,17 +4,20 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func drawStatusbar(screen tcell.Screen) {
-	statusbarQuitLabel := "Quit"
-	statusbarQuitShortcut := "Q, <C-c>"
-	width, height := screen.Size()
+var (
+	statusbarQuitLabel    = "Quit"
+	statusbarQuitShortcut = "Q, <C-c>"
+)
 
-	x := (width - len(statusbarQuitLabel+statusbarQuitShortcut) + 1) / 2
-	for i, r := range statusbarQuitLabel {
-		screen.SetContent(x+i, height-1, r, nil, tcell.StyleDefault.Bold(true))
+func drawStatusbar(screen tcell.Screen) {
+	_, height := screen.Size()
+
+	for i, r := range statusbarQuitShortcut {
+		screen.SetContent(i, height-1, r, nil, tcell.StyleDefault.Bold(true).Reverse(true))
 	}
-	for i, r := range " " + statusbarQuitShortcut {
-		screen.SetContent(x+4+i, height-1, r, nil, tcell.StyleDefault)
+	x := len(statusbarQuitShortcut) + 1
+	for i, r := range " " + statusbarQuitLabel {
+		screen.SetContent(x+i, height-1, r, nil, tcell.StyleDefault)
 	}
 }
 
