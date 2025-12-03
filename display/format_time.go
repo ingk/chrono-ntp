@@ -105,8 +105,17 @@ func formatBeatTime(t time.Time) string {
 }
 
 func formatBeat(beat float64) string {
-	// .beat is always 3 digits, rounded down
-	return leftPadInt(int(beat), 3)
+	// .beat is three digits; we also include centibeats (two digits)
+	// Round down both parts (floor behavior)
+	intPart := int(beat) % 1000
+	frac := beat - float64(intPart)
+	centi := int(frac * 100)
+	// Guard against floating-point rounding producing 100
+	if centi >= 100 {
+		centi = 0
+		intPart = (intPart + 1) % 1000
+	}
+	return fmt.Sprintf("%s.%s", leftPadInt(intPart, 3), leftPadInt(centi, 2))
 }
 
 func leftPadInt(n int, width int) string {

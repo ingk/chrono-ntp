@@ -46,14 +46,14 @@ func TestFormatTime(t *testing.T) {
 	// UTC+1 = 21:13:14, seconds since midnight = 21*3600+13*60+14 = 76414
 	// .beat = 76414 / 86.4 = 884.5 -> @884
 	result = FormatTime(inputTime, sPtr(".beat"))
-	if result != "@677" {
-		t.Errorf("Expected '@677' for .beat, got '%s'", result)
+	if result != "@677.97" {
+		t.Errorf("Expected '@677.97' for .beat, got '%s'", result)
 	}
 
 	// Test .beat with zero padding
 	result = FormatTime(time.Date(2023, 10, 1, 0, 0, 0, 0, time.UTC), sPtr(".beat"))
-	if result != "@041" {
-		t.Errorf("Expected '@041', got '%s'", result)
+	if result != "@041.66" {
+		t.Errorf("Expected '@041.66', got '%s'", result)
 	}
 
 	result = FormatTime(inputTime, sPtr("septimal"))
