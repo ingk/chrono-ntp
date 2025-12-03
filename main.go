@@ -40,7 +40,7 @@ func main() {
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
 	flag.Parse()
 
-	beepsEnabled := *beeps && !slices.Contains([]string{"lunar", "mars"}, *timeFormat)
+	beepsEnabled := *beeps && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
 
 	if *debug {
 		fmt.Printf("Version: %s\n", appVersion)
