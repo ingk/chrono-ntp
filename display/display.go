@@ -19,6 +19,7 @@ type DisplayState struct {
 	ShowTimeZone  bool
 	HideStatusbar bool
 	TimeZone      *time.Location
+	Offset        time.Duration
 }
 
 type Display struct {
@@ -79,7 +80,7 @@ func (d *Display) Update(state DisplayState) {
 	}
 
 	if !state.HideStatusbar {
-		drawStatusbar(d.screen)
+		drawStatusbar(d.screen, state)
 	}
 
 	d.screen.Show()

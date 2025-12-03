@@ -126,6 +126,7 @@ func main() {
 				ShowTimeZone:  *showTimeZone,
 				HideStatusbar: *hideStatusbar,
 				TimeZone:      timeZoneLocation,
+				Offset:        offset,
 			}
 			d.Update(*displayState)
 
