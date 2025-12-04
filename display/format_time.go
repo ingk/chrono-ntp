@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var AllowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal", "mars", "lunar"}
+
 func FormatDate(t time.Time) string {
 	return t.Format(time.DateOnly)
 }
