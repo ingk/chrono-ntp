@@ -82,7 +82,7 @@ The `-time-format` option (or `time-format` in the [configuration file](#configu
 | ISO 8601                                                                              | ISO8601             | 14:30:00    |
 | 12-hour                                                                               | 12h                 | 02:30:00    |
 | 12-hour (AM/PM)                                                                       | 12h_AM_PM           | 02:30:00 PM |
-| [Swatch Internet Time](https://en.wikipedia.org/wiki/Swatch_Internet_Time)            | .beat               | @625        |
+| [Swatch Internet Time](https://en.wikipedia.org/wiki/Swatch_Internet_Time)            | .beat               | @625.00     |
 | [Septimal Time](http://the-light.com/cal/veseptimal.html) (base-7 pairs)              | septimal            | 43 11 52    |
 | [Coordinated Mars Time (MTC)](https://en.wikipedia.org/wiki/Timekeeping_on_Mars)      | mars                | 12:34:56    |
 | [Coordinated Lunar Time (LTC)](https://en.wikipedia.org/wiki/Timekeeping_on_the_Moon) | lunar               | 12:34:56    |
