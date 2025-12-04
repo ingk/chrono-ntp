@@ -59,6 +59,8 @@ Usage of chrono-ntp:
         Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)
   -offline
         Run in offline mode (use system time, ignore NTP server)
+  -write-config
+        Write configuration file (merged from existing configuration file and flags)
   -debug
         Show debug information (e.g. offset from NTP server), then exit
 ```

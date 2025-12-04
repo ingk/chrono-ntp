@@ -60,3 +60,12 @@ func LoadConfiguration() (Configuration, error) {
 	}
 	return parseConfiguration(data)
 }
+
+func WriteConfiguration(config Configuration) (string, error) {
+	configPath := filepath.Join(os.Getenv("HOME"), ".chrono-ntp.toml")
+	data, err := toml.Marshal(config)
+	if err != nil {
+		return configPath, err
+	}
+	return configPath, os.WriteFile(configPath, data, 0644)
+}

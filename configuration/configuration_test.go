@@ -3,6 +3,7 @@ package configuration
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
 
@@ -133,7 +134,7 @@ func TestLoadConfiguration_Error(t *testing.T) {
 	config, err := LoadConfiguration()
 
 	if err == nil {
-		t.Errorf("expected error, got %v", config)
+		t.Fatalf("expected error, got %v", config)
 	}
 }
 
@@ -154,5 +155,76 @@ func TestLoadConfiguration_MissingFile(t *testing.T) {
 
 	if configErr != nil {
 		t.Errorf("did not expect error, got %v", configErr)
+	}
+}
+
+func TestWriteConfiguration(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	oldHome := os.Getenv("HOME")
+	os.Setenv("HOME", tempDir)
+	defer os.Setenv("HOME", oldHome)
+
+	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
+	config := Configuration{
+		Server:        "write.test.server",
+		TimeZone:      "Mars/Colony",
+		HideStatusbar: true,
+		HideDate:      true,
+		ShowTimeZone:  false,
+		TimeFormat:    "mars",
+		Beeps:         true,
+		Offline:       true,
+	}
+
+	configPathResult, err := WriteConfiguration(config)
+
+	if configPathResult != configPath {
+		t.Fatalf("expected config path %q, got %q", configPath, configPathResult)
+	}
+
+	if err != nil {
+		t.Fatalf("Failed to write configuration: %v", err)
+	}
+
+	loadedConfig, err := LoadConfiguration()
+	if err != nil {
+		t.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	if !reflect.DeepEqual(config, loadedConfig) {
+		t.Fatalf("Written configuration does not equal configuration: %v %v", config, loadedConfig)
+	}
+}
+
+func TestWriteConfiguration_WriteError(t *testing.T) {
+	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	oldHome := os.Getenv("HOME")
+	os.Setenv("HOME", tempDir)
+	defer os.Setenv("HOME", oldHome)
+
+	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
+	if err := os.Mkdir(configPath, 0755); err != nil {
+		t.Fatalf("Failed to create directory to block config file: %v", err)
+	}
+
+	config := Configuration{}
+	configPathResult, err := WriteConfiguration(config)
+
+	if configPathResult != configPath {
+		t.Fatalf("expected config path %q, got %q", configPath, configPathResult)
+	}
+
+	if err == nil {
+		t.Fatalf("expected error, got %v", err)
 	}
 }

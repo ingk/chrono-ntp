@@ -38,6 +38,7 @@ func main() {
 	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	version := flag.Bool("version", false, "Show version and exit")
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
+	writeConfig := flag.Bool("write-config", false, "Write configuration file (merged from existing configuration file and flags)")
 	flag.Parse()
 
 	beepsEnabled := *beeps && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
@@ -55,6 +56,26 @@ func main() {
 
 	if !slices.Contains(allowedTimeFormats[:], *timeFormat) {
 		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats[:], ", "))
+	}
+
+	if *writeConfig {
+		mergedConfig := configuration.Configuration{
+			Server:        *ntpServer,
+			TimeZone:      *timeZone,
+			HideStatusbar: *hideStatusbar,
+			HideDate:      *hideDate,
+			ShowTimeZone:  *showTimeZone,
+			TimeFormat:    *timeFormat,
+			Beeps:         *beeps,
+			Offline:       *offline,
+		}
+		configPath, err := configuration.WriteConfiguration(mergedConfig)
+		if err == nil {
+			fmt.Printf("Configuration written to %s\n", configPath)
+		} else {
+			log.Fatalf("Failed to write configuration (%s): %v", configPath, err)
+		}
+		return
 	}
 
 	timeZoneLocation, err := time.LoadLocation(*timeZone)
