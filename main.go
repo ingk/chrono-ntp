@@ -100,18 +100,14 @@ func main() {
 
 	d := display.NewDisplay(screen)
 
-	if *offline {
-		d.SetInitText("Offline mode: using system time")
-	} else {
-		d.SetInitText("Querying NTP server for time...")
-	}
-
-	var ntpClient *ntp.Ntp
 	var offset time.Duration
+
 	if *offline {
 		offset = 0
 	} else {
-		ntpClient, err = ntp.NewNtp(*ntpServer)
+		d.SetInitText("Querying NTP server for time...")
+
+		ntpClient, err := ntp.NewNtp(*ntpServer)
 		if err != nil {
 			log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
 		}
