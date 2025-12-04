@@ -31,6 +31,9 @@ func drawStatusbar(screen tcell.Screen, state DisplayState) {
 
 	x = x + len(statusbarOffsetLabel) + 1
 	offset := strconv.FormatInt(state.Offset.Milliseconds(), 10) + "ms"
+	if state.Offline {
+		offset = "(offline)"
+	}
 	for i, r := range offset {
 		screen.SetContent(x+i, y, r, nil, tcell.StyleDefault)
 	}

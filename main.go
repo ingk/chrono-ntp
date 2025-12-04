@@ -144,6 +144,7 @@ func main() {
 				HideStatusbar: *hideStatusbar,
 				TimeZone:      timeZoneLocation,
 				Offset:        offset,
+				Offline:       *offline,
 			}
 			d.Update(*displayState)
 

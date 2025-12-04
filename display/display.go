@@ -20,6 +20,7 @@ type DisplayState struct {
 	HideStatusbar bool
 	TimeZone      *time.Location
 	Offset        time.Duration
+	Offline       bool
 }
 
 type Display struct {
