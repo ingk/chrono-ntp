@@ -61,6 +61,7 @@ jobs:
 
       - name: Static Analysis
         uses: dominikh/staticcheck-action@v1
+        if: ${{ matrix.goos == 'linux' }}
         with:
           version: "2025.1.1"
           install-go: false
