@@ -1,6 +1,6 @@
 APP_NAME = chrono-ntp
 
-.PHONY: all test build clean run readme-demo
+.PHONY: all test build clean release run readme-demo
 
 all: test build
 
@@ -15,6 +15,9 @@ run:
 
 clean:
 	rm -f $(APP_NAME)
+
+release:
+	gh workflow run release.yml
 
 readme-demo:
 	vhs assets/demo.tape --output assets/demo.gif
