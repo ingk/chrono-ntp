@@ -3,8 +3,9 @@
 
 # chrono-ntp
 
-![Analog](https://honey.badgers.space/badge/-/chrono-ntp/blue?icon=feather-watch&label=)
-![Release](https://badgers.space/github/release/ingk/chrono-ntp)
+![chrono-ntp](https://honey.badgers.space/badge/-/chrono-ntp/blue?icon=feather-watch&label=)
+![Supported Platforms](https://honey.badgers.space/badge/-/Linux,%20macOS,%20Windows/black?icon=feather-check&label=)
+![Release](https://badgers.space/github/release/ingk/chrono-ntp?color=black)
 ![Checks](https://badgers.space/github/checks/ingk/chrono-ntp/main)
 ![MIT license](https://badgers.space/github/license/ingk/chrono-ntp/?color=blue)
 
