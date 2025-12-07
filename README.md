@@ -20,9 +20,15 @@ You can use chrono-ntp to set your mechanical or digital watches or as a minimal
 
 ## Getting Started
 
-You can download the latest release from the [releases page on GitHub](https://github.com/ingk/chrono-ntp/releases).
+Download the latest release from the [releases page on GitHub](https://github.com/ingk/chrono-ntp/releases) and choose the binary for your platform.
 
-Simply download the appropriate binary for your platform and follow the usage instructions.
+### Supported Platforms
+
+| OS           | CPU Architectures    |
+|--------------|----------------------|
+| Linux        | x86_64, arm64, armv7 |
+| macOS        | x86_64, arm64        |
+| Windows      | x86_64, arm64        |
 
 ### Installation via Homebrew
 
