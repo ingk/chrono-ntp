@@ -8,10 +8,6 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func NewScreen() (tcell.Screen, error) {
-	return tcell.NewScreen()
-}
-
 type DisplayState struct {
 	Now           time.Time
 	TimeFormat    string
@@ -27,8 +23,17 @@ type Display struct {
 	screen tcell.Screen
 }
 
-func NewDisplay(screen tcell.Screen) *Display {
-	return &Display{screen: screen}
+func NewDisplay() (*Display, error) {
+	screen, err := tcell.NewScreen()
+	return &Display{screen: screen}, err
+}
+
+func (d *Display) Init() error {
+	return d.screen.Init()
+}
+
+func (d *Display) Finalize() {
+	d.screen.Fini()
 }
 
 func (d *Display) PollEvents(quitChan chan<- struct{}) {

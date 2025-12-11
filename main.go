@@ -88,17 +88,15 @@ func main() {
 		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
 
-	// Initialize screen early to show loading message
-	screen, err := display.NewScreen()
+	// Initialize display early to show loading message
+	d, err := display.NewDisplay()
 	if err != nil {
-		log.Fatalf("Failed to create screen: %v", err)
+		log.Fatalf("Failed to create display: %v", err)
 	}
-	if err := screen.Init(); err != nil {
-		log.Fatalf("Failed to initialize screen: %v", err)
+	if err := d.Init(); err != nil {
+		log.Fatalf("Failed to initialize display: %v", err)
 	}
-	defer screen.Fini()
-
-	d := display.NewDisplay(screen)
+	defer d.Finalize()
 
 	var offset time.Duration
 
