@@ -10,6 +10,7 @@ import (
 
 type DisplayState struct {
 	Now           time.Time
+	DateFormat    string
 	TimeFormat    string
 	HideDate      bool
 	ShowTimeZone  bool
@@ -69,7 +70,7 @@ func (d *Display) Update(state DisplayState) {
 	drawTextCentered(d.screen, centerY, FormatTime(state.Now, &state.TimeFormat), tcell.StyleDefault.Bold(true))
 
 	if !state.HideDate {
-		drawTextCentered(d.screen, centerY-1, FormatDate(state.Now), tcell.StyleDefault)
+		drawTextCentered(d.screen, centerY-1, FormatDate(state.Now, &state.DateFormat), tcell.StyleDefault)
 	}
 
 	if state.ShowTimeZone {

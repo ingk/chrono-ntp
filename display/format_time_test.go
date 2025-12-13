@@ -23,9 +23,22 @@ func TestNormalizeTimezoneName(t *testing.T) {
 
 func TestFormatDate(t *testing.T) {
 	inputTime := time.Date(2023, 10, 1, 12, 13, 14, 0, time.UTC)
-	result := FormatDate(inputTime)
-	if result != "2023-10-01" {
-		t.Errorf("Expected '2023-10-01', got '%s'", result)
+
+	tests := []struct {
+		format   string
+		expected string
+	}{
+		{"YYYY-MM-DD", "2023-10-01"},
+		{"DD/MM/YYYY", "01/10/2023"},
+		{"MM/DD/YYYY", "10/01/2023"},
+		{"DD.MM.YYYY", "01.10.2023"},
+	}
+
+	for _, tt := range tests {
+		got := FormatDate(inputTime, &tt.format)
+		if got != tt.expected {
+			t.Errorf("FormatDate(%q): expected '%s', got '%s'", tt.format, tt.expected, got)
+		}
 	}
 }
 

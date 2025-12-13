@@ -56,6 +56,8 @@ Usage of chrono-ntp:
         Time zone name (e.g., 'America/New_York') (default "Local")
   -show-time-zone
         Show the time zone below time
+  -date-format string
+        Date display format (YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, DD.MM.YYYY) (default "YYYY-MM-DD")
   -time-format string
         Time display format (ISO8601, 12h, 12h_AM_PM, .beat, septimal, mars, lunar) (default "ISO8601")
   -hide-date
@@ -104,6 +106,7 @@ Example `~/.chrono-ntp.toml`:
 server = "time.google.com"
 time-zone = "Europe/Berlin"
 show-time-zone = true
+date-format = "YYYY-MM-DD"
 time-format = "ISO8601"
 hide-date = false
 hide-statusbar = false

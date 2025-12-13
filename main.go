@@ -21,6 +21,7 @@ const (
 )
 
 var allowedTimeFormats = display.AllowedTimeFormats[:]
+var allowedDateFormats = display.AllowedDateFormats[:]
 
 func main() {
 	config, err := configuration.LoadConfiguration()
@@ -34,6 +35,7 @@ func main() {
 	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the date display")
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
+	dateFormat := flag.String("date-format", "YYYY-MM-DD", fmt.Sprintf("Date display format (%s)", strings.Join(allowedDateFormats, ", ")))
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
 	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
 	version := flag.Bool("version", false, "Show version and exit")
@@ -136,6 +138,7 @@ func main() {
 
 			displayState := &display.DisplayState{
 				Now:           now,
+				DateFormat:    *dateFormat,
 				TimeFormat:    *timeFormat,
 				HideDate:      *hideDate,
 				ShowTimeZone:  *showTimeZone,

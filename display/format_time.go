@@ -5,10 +5,22 @@ import (
 	"time"
 )
 
+var AllowedDateFormats = [...]string{"YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY", "DD.MM.YYYY"}
 var AllowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal", "mars", "lunar"}
 
-func FormatDate(t time.Time) string {
-	return t.Format(time.DateOnly)
+func FormatDate(t time.Time, dateFormat *string) string {
+	switch *dateFormat {
+	case "YYYY-MM-DD":
+		return t.Format("2006-01-02")
+	case "DD/MM/YYYY":
+		return t.Format("02/01/2006")
+	case "MM/DD/YYYY":
+		return t.Format("01/02/2006")
+	case "DD.MM.YYYY":
+		return t.Format("02.01.2006")
+	default:
+		return t.Format("2006-01-02") // fallback to ISO
+	}
 }
 
 func FormatTime(t time.Time, timeFormat *string) string {
