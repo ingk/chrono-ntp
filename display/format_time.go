@@ -6,7 +6,7 @@ import (
 )
 
 var AllowedDateFormats = [...]string{"YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY", "DD.MM.YYYY"}
-var AllowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal", "mars", "lunar"}
+var AllowedTimeFormats = [...]string{"ISO8601", "12h", "12h_AM_PM", ".beat", "septimal", "mars", "lunar", "unix"}
 
 func FormatDate(t time.Time, dateFormat *string) string {
 	switch *dateFormat {
@@ -33,6 +33,8 @@ func FormatTime(t time.Time, timeFormat *string) string {
 		return formatMarsTime(t)
 	case "lunar":
 		return formatLunarTime(t)
+	case "unix":
+		return fmt.Sprintf("%d", t.Unix())
 	default:
 		timeFormatMap := map[string]string{
 			"ISO8601":   "15:04:05",

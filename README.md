@@ -59,7 +59,7 @@ Usage of chrono-ntp:
   -date-format string
         Date display format (YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, DD.MM.YYYY) (default "YYYY-MM-DD")
   -time-format string
-        Time display format (ISO8601, 12h, 12h_AM_PM, .beat, septimal, mars, lunar) (default "ISO8601")
+        Time display format (ISO8601, 12h, 12h_AM_PM, .beat, septimal, mars, lunar, unix) (default "ISO8601")
   -hide-date
         Hide the current date
   -hide-statusbar
@@ -95,6 +95,7 @@ The `-time-format` option (or `time-format` in the [configuration file](#configu
 | [Septimal Time](http://the-light.com/cal/veseptimal.html) (base-7 pairs)              | septimal            | 43 11 52    |
 | [Coordinated Mars Time (MTC)](https://en.wikipedia.org/wiki/Timekeeping_on_Mars)      | mars                | 12:34:56    |
 | [Coordinated Lunar Time (LTC)](https://en.wikipedia.org/wiki/Timekeeping_on_the_Moon) | lunar               | 12:34:56    |
+| Unix Timestamp (seconds since epoch)                                                  | unix                | 1696173377  |
 
 ### Configuration File
 
