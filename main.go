@@ -56,6 +56,10 @@ func main() {
 		return
 	}
 
+	if !slices.Contains(allowedDateFormats, *dateFormat) {
+		log.Fatalf("Error: invalid date format '%s'. Allowed values: %s", *dateFormat, strings.Join(allowedDateFormats, ", "))
+	}
+
 	if !slices.Contains(allowedTimeFormats, *timeFormat) {
 		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats, ", "))
 	}
