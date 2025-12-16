@@ -22,6 +22,7 @@ const (
 
 var allowedTimeFormats = display.AllowedTimeFormats[:]
 var allowedDateFormats = display.AllowedDateFormats[:]
+var offset time.Duration = 0
 
 func main() {
 	config, err := configuration.LoadConfiguration()
@@ -42,8 +43,6 @@ func main() {
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
 	writeConfig := flag.Bool("write-config", false, "Write configuration file (merged from existing configuration file and flags)")
 	flag.Parse()
-
-	beepsEnabled := *beeps && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
 
 	if *debug {
 		fmt.Printf("Version: %s\n", appVersion)
@@ -93,6 +92,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
+	beepsEnabled := *beeps && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
 
 	// Initialize display early to show loading message
 	d, err := display.NewDisplay()
@@ -104,11 +104,7 @@ func main() {
 	}
 	defer d.Finalize()
 
-	var offset time.Duration
-
-	if *offline {
-		offset = 0
-	} else {
+	if !*offline {
 		d.SetInitText("Querying NTP server for time...")
 
 		ntpClient, err := ntp.NewNtp(*ntpServer)
