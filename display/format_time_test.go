@@ -28,6 +28,7 @@ func TestFormatDate(t *testing.T) {
 		format   string
 		expected string
 	}{
+		{"unknown-format", "2023-10-01"},
 		{"YYYY-MM-DD", "2023-10-01"},
 		{"DD/MM/YYYY", "01/10/2023"},
 		{"MM/DD/YYYY", "10/01/2023"},
