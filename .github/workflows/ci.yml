@@ -6,7 +6,39 @@ env:
   GO_VERSION: '1.24.2'
 
 jobs:
+  gitleaks:
+    name: Gitleaks Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "detect --source . --no-git --redact"
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Static Analysis
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "2025.1.1"
+          install-go: false
+          cache-key: go-${{ env.GO_VERSION }}
+
   ci:
+    needs: [gitleaks, static-analysis]
     strategy:
       matrix:
         include:
@@ -26,19 +58,22 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ env.GO_VERSION }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ env.GO_VERSION }}-
+
       - name: Install development dependencies
         if: ${{ matrix.goos == 'linux' }}
         run: sudo apt install -y libasound2-dev
 
       - name: Test
         run: go test ./...
-
-      - name: Static Analysis
-        uses: dominikh/staticcheck-action@v1
-        with:
-          version: "2025.1.1"
-          install-go: false
-          cache-key: ${{ matrix.goos }}${{ matrix.goarch }}${{ env.GO_VERSION }}
 
       - name: Build
         run: |

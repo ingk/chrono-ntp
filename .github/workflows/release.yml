@@ -7,6 +7,37 @@ env:
   GO_VERSION: '1.24.2'
 
 jobs:
+  gitleaks:
+    name: Gitleaks Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "detect --source . --no-git --redact"
+
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Static Analysis
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "2025.1.1"
+          install-go: false
+          cache-key: go-${{ env.GO_VERSION }}
+
   set_tag:
     runs-on: ubuntu-latest
     outputs:
@@ -20,7 +51,7 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
   build:
-    needs: set_tag
+    needs: [gitleaks, static-analysis, set_tag]
 
     strategy:
       matrix:
@@ -58,14 +89,6 @@ jobs:
       - name: Install development dependencies
         if: ${{ matrix.goos == 'linux' }}
         run: sudo apt install -y libasound2-dev
-
-      - name: Static Analysis
-        uses: dominikh/staticcheck-action@v1
-        if: ${{ matrix.goos == 'linux' }}
-        with:
-          version: "2025.1.1"
-          install-go: false
-          cache-key: ${{ matrix.goos }}${{ matrix.goarch }}${{ env.GO_VERSION }}
 
       - name: Build
         run: |
