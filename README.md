@@ -62,7 +62,7 @@ Usage of chrono-ntp:
         Time display format (ISO8601, 12h, 12h_AM_PM, .beat, septimal, mars, lunar, unix) (default "ISO8601")
   -hide-date
         Hide the current date
-  -hide-statusbar
+  -hide-status-bar
         Hide the status bar
   -beeps
         Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)
@@ -110,7 +110,7 @@ show-time-zone = true
 date-format = "YYYY-MM-DD"
 time-format = "ISO8601"
 hide-date = false
-hide-statusbar = false
+hide-status-bar = false
 beeps = true
 ```
 

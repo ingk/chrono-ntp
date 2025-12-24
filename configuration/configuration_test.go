@@ -16,8 +16,8 @@ func TestParseConfiguration_Defaults(t *testing.T) {
 	if config.TimeZone != "Local" {
 		t.Errorf("expected TimeZone %q, got %q", "Local", config.TimeZone)
 	}
-	if config.HideStatusbar != false {
-		t.Errorf("expected HideStatusbar false, got %v", config.HideStatusbar)
+	if config.HideStatusBar != false {
+		t.Errorf("expected HideStatusBar false, got %v", config.HideStatusBar)
 	}
 	if config.HideDate != false {
 		t.Errorf("expected HideDate false, got %v", config.HideDate)
@@ -40,7 +40,7 @@ func TestParseConfiguration_Content(t *testing.T) {
 	tomlContent := `
 server = "pool.example-time-server.org"
 time-zone = "Europe/Berlin"
-hide-statusbar = true
+hide-status-bar = true
 hide-date = true
 show-time-zone = true
 time-format = "12h_AM_PM"
@@ -55,8 +55,8 @@ offline = true
 	if config.TimeZone != "Europe/Berlin" {
 		t.Errorf("expected TimeZone 'Europe/Berlin', got %q", config.TimeZone)
 	}
-	if config.HideStatusbar != true {
-		t.Errorf("expected HideStatusbar true, got %v", config.HideStatusbar)
+	if config.HideStatusBar != true {
+		t.Errorf("expected HideStatusBar true, got %v", config.HideStatusBar)
 	}
 	if config.HideDate != true {
 		t.Errorf("expected HideDate true, got %v", config.HideDate)
@@ -173,7 +173,7 @@ func TestWriteConfiguration(t *testing.T) {
 	config := Configuration{
 		Server:        "write.test.server",
 		TimeZone:      "Mars/Colony",
-		HideStatusbar: true,
+		HideStatusBar: true,
 		HideDate:      true,
 		ShowTimeZone:  false,
 		TimeFormat:    "mars",

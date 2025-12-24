@@ -14,7 +14,7 @@ const defaultTimeZone = "Local"
 type Configuration struct {
 	Server        string `toml:"server"`
 	TimeZone      string `toml:"time-zone"`
-	HideStatusbar bool   `toml:"hide-statusbar"`
+	HideStatusBar bool   `toml:"hide-status-bar"`
 	HideDate      bool   `toml:"hide-date"`
 	ShowTimeZone  bool   `toml:"show-time-zone"`
 	TimeFormat    string `toml:"time-format"`
@@ -37,7 +37,7 @@ func parseConfiguration(data []byte) (Configuration, error) {
 	config := Configuration{
 		Server:        defaultNtpServer,
 		TimeZone:      defaultTimeZone,
-		HideStatusbar: false,
+		HideStatusBar: false,
 		HideDate:      false,
 		ShowTimeZone:  true,
 		TimeFormat:    defaultTimeFormat,

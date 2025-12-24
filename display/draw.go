@@ -7,29 +7,29 @@ import (
 )
 
 var (
-	statusbarQuitLabel    = "Quit"
-	statusbarQuitShortcut = "Q, <C-c>"
-	statusbarOffsetLabel  = "Offset"
+	statusBarQuitLabel    = "Quit"
+	statusBarQuitShortcut = "Q, <C-c>"
+	statusBarOffsetLabel  = "Offset"
 )
 
-func drawStatusbar(screen tcell.Screen, state DisplayState) {
+func drawStatusBar(screen tcell.Screen, state DisplayState) {
 	_, height := screen.Size()
 	y := height - 1
 
-	for i, r := range statusbarQuitShortcut {
+	for i, r := range statusBarQuitShortcut {
 		screen.SetContent(i, y, r, nil, tcell.StyleDefault.Bold(true).Reverse(true))
 	}
-	x := len(statusbarQuitShortcut) + 1
-	for i, r := range statusbarQuitLabel {
+	x := len(statusBarQuitShortcut) + 1
+	for i, r := range statusBarQuitLabel {
 		screen.SetContent(x+i, y, r, nil, tcell.StyleDefault)
 	}
 
-	x = x + len(statusbarQuitLabel) + 4
-	for i, r := range statusbarOffsetLabel {
+	x = x + len(statusBarQuitLabel) + 4
+	for i, r := range statusBarOffsetLabel {
 		screen.SetContent(x+i, y, r, nil, tcell.StyleDefault.Bold(true).Reverse(true))
 	}
 
-	x = x + len(statusbarOffsetLabel) + 1
+	x = x + len(statusBarOffsetLabel) + 1
 	offset := strconv.FormatInt(state.Offset.Milliseconds(), 10) + "ms"
 	if state.Offline {
 		offset = "(offline)"

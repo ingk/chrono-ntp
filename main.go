@@ -33,7 +33,7 @@ func main() {
 	ntpServer := flag.String("server", config.Server, "NTP server to synchronize time from")
 	timeZone := flag.String("time-zone", config.TimeZone, "Time zone name (e.g., 'America/New_York')")
 	debug := flag.Bool("debug", false, "Show debug information (e.g., offset from NTP server) and exit")
-	hideStatusbar := flag.Bool("hide-statusbar", config.HideStatusbar, "Hide the status bar")
+	hideStatusBar := flag.Bool("hide-status-bar", config.HideStatusBar, "Hide the status bar")
 	hideDate := flag.Bool("hide-date", config.HideDate, "Hide the date display")
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
 	dateFormat := flag.String("date-format", "YYYY-MM-DD", fmt.Sprintf("Date display format (%s)", strings.Join(allowedDateFormats, ", ")))
@@ -67,7 +67,7 @@ func main() {
 		mergedConfig := configuration.Configuration{
 			Server:        *ntpServer,
 			TimeZone:      *timeZone,
-			HideStatusbar: *hideStatusbar,
+			HideStatusBar: *hideStatusBar,
 			HideDate:      *hideDate,
 			ShowTimeZone:  *showTimeZone,
 			TimeFormat:    *timeFormat,
@@ -142,7 +142,7 @@ func main() {
 				TimeFormat:    *timeFormat,
 				HideDate:      *hideDate,
 				ShowTimeZone:  *showTimeZone,
-				HideStatusbar: *hideStatusbar,
+				HideStatusBar: *hideStatusBar,
 				TimeZone:      timeZoneLocation,
 				Offset:        offset,
 				Offline:       *offline,

@@ -14,7 +14,7 @@ type DisplayState struct {
 	TimeFormat    string
 	HideDate      bool
 	ShowTimeZone  bool
-	HideStatusbar bool
+	HideStatusBar bool
 	TimeZone      *time.Location
 	Offset        time.Duration
 	Offline       bool
@@ -86,8 +86,8 @@ func (d *Display) Update(state DisplayState) {
 		drawTextCentered(d.screen, centerY+1, timeZoneLabel, tcell.StyleDefault)
 	}
 
-	if !state.HideStatusbar {
-		drawStatusbar(d.screen, state)
+	if !state.HideStatusBar {
+		drawStatusBar(d.screen, state)
 	}
 
 	d.screen.Show()
