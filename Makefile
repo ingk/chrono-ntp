@@ -8,7 +8,7 @@ test:
 	go test ./...
 
 build:
-	go build -o $(APP_NAME) main.go
+	go build -ldflags="-s -w" -o $(APP_NAME) main.go
 
 run:
 	go run ./... --server=time.google.com
