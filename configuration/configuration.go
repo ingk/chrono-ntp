@@ -7,9 +7,11 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
-const defaultNtpServer = "time.google.com"
-const defaultTimeFormat = "ISO8601"
-const defaultTimeZone = "Local"
+const (
+	defaultNtpServer  = "time.google.com"
+	defaultTimeFormat = "ISO8601"
+	defaultTimeZone   = "Local"
+)
 
 type Configuration struct {
 	Server        string `toml:"server"`

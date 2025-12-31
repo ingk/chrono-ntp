@@ -12,13 +12,8 @@ type Ntp struct {
 	lastNtpTime time.Time
 }
 
-func NewNtp(server string) (*Ntp, error) {
-	n := &Ntp{server: server}
-	err := n.Refresh()
-	if err != nil {
-		return nil, err
-	}
-	return n, nil
+func NewNtp(server string) *Ntp {
+	return &Ntp{server: server}
 }
 
 func (n *Ntp) Offset() time.Duration {

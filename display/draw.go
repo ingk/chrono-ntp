@@ -1,6 +1,7 @@
 package display
 
 import (
+	"chrono-ntp/timesource"
 	"strconv"
 
 	"github.com/gdamore/tcell/v2"
@@ -30,9 +31,11 @@ func drawStatusBar(screen tcell.Screen, state DisplayState) {
 	}
 
 	x = x + len(statusBarOffsetLabel) + 1
-	offset := strconv.FormatInt(state.Offset.Milliseconds(), 10) + "ms"
+	offset := strconv.FormatInt(state.TimeStatus.Offset.Milliseconds(), 10) + "ms"
 	if state.Offline {
 		offset = "(offline)"
+	} else if state.TimeStatus.State == timesource.StateSyncing {
+		offset = "(syncing)"
 	}
 	for i, r := range offset {
 		screen.SetContent(x+i, y, r, nil, tcell.StyleDefault)

@@ -11,18 +11,18 @@ import (
 	"chrono-ntp/audio"
 	"chrono-ntp/configuration"
 	"chrono-ntp/display"
-	"chrono-ntp/ntp"
+	"chrono-ntp/timesource"
 )
 
 const (
-	appName                  = "chrono-ntp"
-	appVersion               = "dev"
-	ntpOffsetRefreshInterval = 15 * time.Minute
+	appName                   = "chrono-ntp"
+	appVersion                = "dev"
+	timeSourceRefreshInterval = 15 * time.Minute
 )
 
 var allowedTimeFormats = display.AllowedTimeFormats[:]
 var allowedDateFormats = display.AllowedDateFormats[:]
-var offset time.Duration = 0
+var timeSource timesource.TimeSource
 
 func main() {
 	config, err := configuration.LoadConfiguration()
@@ -104,26 +104,21 @@ func main() {
 	}
 	defer d.Finalize()
 
-	if !*offline {
-		d.SetInitText("Querying NTP server for time...")
-
-		ntpClient, err := ntp.NewNtp(*ntpServer)
-		if err != nil {
-			log.Fatalf("Failed to get time from NTP server %s: %v", *ntpServer, err)
-		}
-		offset = ntpClient.Offset()
-
-		go func() {
-			ticker := time.NewTicker(ntpOffsetRefreshInterval)
-			defer ticker.Stop()
-			for range ticker.C {
-				if err := ntpClient.Refresh(); err == nil {
-					offset = ntpClient.Offset()
-				}
-				// If error, ignore and keep previous offset
-			}
-		}()
+	if *offline {
+		timeSource = timesource.NewOfflineTimeSource()
+	} else {
+		timeSource = timesource.NewNtpTimeSource(*ntpServer)
 	}
+
+	go func() {
+		timeSource.Refresh()
+
+		ticker := time.NewTicker(timeSourceRefreshInterval)
+		defer ticker.Stop()
+		for range ticker.C {
+			timeSource.Refresh()
+		}
+	}()
 
 	quitChan := make(chan struct{})
 	go d.PollEvents(quitChan)
@@ -134,23 +129,22 @@ func main() {
 	for {
 		select {
 		case <-displayTicker.C:
-			now := time.Now().Add(-offset).In(timeZoneLocation)
+			timeStatus := timeSource.TimeStatus()
 
 			displayState := &display.DisplayState{
-				Now:           now,
+				TimeStatus:    timeStatus,
+				TimeZone:      timeZoneLocation,
 				DateFormat:    *dateFormat,
 				TimeFormat:    *timeFormat,
 				HideDate:      *hideDate,
 				ShowTimeZone:  *showTimeZone,
 				HideStatusBar: *hideStatusBar,
-				TimeZone:      timeZoneLocation,
-				Offset:        offset,
 				Offline:       *offline,
 			}
 			d.Update(*displayState)
 
 			if beepsEnabled {
-				audio.BeepTick(audioContext, now)
+				audio.BeepTick(audioContext, timeStatus.ReferenceTime)
 			}
 		case <-quitChan:
 			return

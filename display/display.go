@@ -1,6 +1,7 @@
 package display
 
 import (
+	"chrono-ntp/timesource"
 	"slices"
 	"strings"
 	"time"
@@ -9,14 +10,13 @@ import (
 )
 
 type DisplayState struct {
-	Now           time.Time
+	TimeStatus    timesource.TimeStatus
+	TimeZone      *time.Location
 	DateFormat    string
 	TimeFormat    string
 	HideDate      bool
 	ShowTimeZone  bool
 	HideStatusBar bool
-	TimeZone      *time.Location
-	Offset        time.Duration
 	Offline       bool
 }
 
@@ -52,25 +52,17 @@ func (d *Display) PollEvents(quitChan chan<- struct{}) {
 	}
 }
 
-func (d *Display) SetInitText(text string) {
-	_, height := d.screen.Size()
-	centerY := height/2 - 1
-
-	d.screen.Clear()
-	drawTextCentered(d.screen, centerY, text, tcell.StyleDefault.Bold(true))
-	d.screen.Show()
-}
-
 func (d *Display) Update(state DisplayState) {
 	d.screen.Clear()
 
 	_, height := d.screen.Size()
 	centerY := height/2 - 1
+	now := state.TimeStatus.ReferenceTime.In(state.TimeZone)
 
-	drawTextCentered(d.screen, centerY, FormatTime(state.Now, &state.TimeFormat), tcell.StyleDefault.Bold(true))
+	drawTextCentered(d.screen, centerY, FormatTime(now, &state.TimeFormat), tcell.StyleDefault.Bold(true))
 
 	if !state.HideDate {
-		drawTextCentered(d.screen, centerY-1, FormatDate(state.Now, &state.DateFormat), tcell.StyleDefault)
+		drawTextCentered(d.screen, centerY-1, FormatDate(now, &state.DateFormat), tcell.StyleDefault)
 	}
 
 	if state.ShowTimeZone {
