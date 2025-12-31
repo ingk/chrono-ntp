@@ -6,7 +6,6 @@ import "time"
 var _ TimeSource = (*OfflineTimeSource)(nil)
 
 type OfflineTimeSource struct {
-	lastStatus TimeStatus
 }
 
 func NewOfflineTimeSource() *OfflineTimeSource {
@@ -19,15 +18,13 @@ func (s *OfflineTimeSource) Name() string {
 
 func (s *OfflineTimeSource) TimeStatus() TimeStatus {
 	now := time.Now()
-	status := TimeStatus{
+	return TimeStatus{
 		Source:        s.Name(),
 		State:         StateLocked,
 		ReferenceTime: now,
 		LocalTime:     now,
 		Offset:        0,
 	}
-	s.lastStatus = status
-	return s.lastStatus
 }
 
 func (s *OfflineTimeSource) Refresh() error {
