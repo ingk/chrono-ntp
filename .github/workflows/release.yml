@@ -111,12 +111,13 @@ jobs:
           mkdir -p dist
           EXT=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXT=".exe"; fi
-          BUILD_ENV="GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }}"
-          if [ "${{ matrix.goarm }}" != "" ]; then BUILD_ENV="$BUILD_ENV GOARM=${{ matrix.goarm }}"; fi
+          export GOOS=${{ matrix.goos }}
+          export GOARCH=${{ matrix.goarch }}
+          if [ "${{ matrix.goarm }}" != "" ]; then export GOARM=${{ matrix.goarm }}; fi
           if [ "${{ matrix.goos }}" = "linux" ]; then
-            CGO_ENABLED=1 $BUILD_ENV go build -ldflags="-s -w -X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.label }} main.go
+            CGO_ENABLED=1 go build -ldflags="-s -w -X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.label }} main.go
           else
-            $BUILD_ENV go build -ldflags="-s -w -X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.label }}$EXT main.go
+            go build -ldflags="-s -w -X main.appVersion=${{ needs.set_tag.outputs.tag }}" -o dist/chrono-ntp-${{ matrix.label }}$EXT main.go
           fi
 
       - name: Upload build artifact
