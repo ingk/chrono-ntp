@@ -25,11 +25,11 @@ Download the latest release from the [releases page on GitHub](https://github.co
 
 ### Supported Platforms
 
-| OS           | CPU Architectures    |
-|--------------|----------------------|
-| Linux        | x86_64, arm64, armv7 |
-| macOS        | x86_64, arm64        |
-| Windows      | x86_64, arm64        |
+| OS      | CPU Architectures |
+|---------|-------------------|
+| Linux   | x86_64, arm64     |
+| macOS   | x86_64, arm64     |
+| Windows | x86_64, arm64     |
 
 ### Installation via Homebrew
 
