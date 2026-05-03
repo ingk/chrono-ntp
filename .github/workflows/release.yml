@@ -155,6 +155,3 @@ jobs:
         fail_on_unmatched_files: true
         tag_name: ${{ needs.set_tag.outputs.tag }}
         name: chrono-ntp ${{ needs.set_tag.outputs.tag }}
-
-    - name: Release (Raspberry) script
-      run: echo "cd ~/repositories/chrono-ntp && git pull && mkdir -p dist && rm -f dist/chrono-ntp-raspberry-arm64 && go build -ldflags=\"-s -w -X main.appVersion=${{ needs.set_tag.outputs.tag }}\" -o dist/chrono-ntp-raspberry-arm64 main.go && gh release upload ${{ needs.set_tag.outputs.tag }} dist/chrono-ntp-raspberry-arm64"
