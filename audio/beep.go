@@ -9,10 +9,19 @@ import (
 	"github.com/ebitengine/oto/v3"
 )
 
+type BeepStrategy string
+
+const (
+	BeepStrategyGreenwich  BeepStrategy = "greenwich"
+	BeepStrategyContinuous BeepStrategy = "continuous"
+)
+
+var AllowedBeepPatterns = [...]string{string(BeepStrategyGreenwich), string(BeepStrategyContinuous)}
+
 var (
 	shortBeep     []byte
 	longBeep      []byte
-	currentSecond int
+	currentSecond int = -1
 )
 
 func init() {
@@ -20,25 +29,40 @@ func init() {
 	longBeep = makeSineWaveTable(longMs)
 }
 
-func BeepTick(ctx *oto.Context, now time.Time) {
-	if !shouldBeep(now) || currentSecond == now.Second() {
+func BeepTick(ctx *oto.Context, now time.Time, strategy BeepStrategy) {
+	switch strategy {
+	case BeepStrategyGreenwich:
+		beepGreenwich(ctx, now)
+	case BeepStrategyContinuous:
+		beepContinuous(ctx, now)
+	}
+}
+
+func beepGreenwich(ctx *oto.Context, now time.Time) {
+	shouldBeep := now.Second() >= 55 || now.Second() == 0
+	if !shouldBeep || currentSecond == now.Second() {
 		return
 	}
 
 	currentSecond = now.Second()
-
-	go func(currentSecond int) {
-		if currentSecond == 0 {
-			playBeep(ctx, longBeep, longMs)
-		} else {
-			playBeep(ctx, shortBeep, shortMs)
-		}
-	}(currentSecond)
+	if currentSecond == 0 {
+		go playBeep(ctx, longBeep, longMs)
+	} else {
+		go playBeep(ctx, shortBeep, shortMs)
+	}
 }
 
-func shouldBeep(now time.Time) bool {
-	sec := now.Second()
-	return sec >= 55 || sec == 0
+func beepContinuous(ctx *oto.Context, now time.Time) {
+	if currentSecond == -1 {
+		currentSecond = now.Second()
+		return
+	}
+	if currentSecond == now.Second() {
+		return
+	}
+
+	currentSecond = now.Second()
+	go playBeep(ctx, shortBeep, shortMs)
 }
 
 func playBeep(ctx *oto.Context, data []byte, durationMs int) {

@@ -64,8 +64,8 @@ Usage of chrono-ntp:
         Hide the current date
   -hide-status-bar
         Hide the status bar
-  -beeps
-        Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)
+  -beep-pattern
+        Beep pattern (continuous, greenwich)
   -offline
         Run in offline mode (use system time, ignore NTP server)
   -write-config
@@ -97,6 +97,15 @@ The `-time-format` option (or `time-format` in the [configuration file](#configu
 | [Coordinated Lunar Time (LTC)](https://en.wikipedia.org/wiki/Timekeeping_on_the_Moon) | lunar               | 12:34:56    |
 | Unix Timestamp (seconds since epoch)                                                  | unix                | 1696173377  |
 
+### Beep Pattern
+
+The `-beep-pattern` option (or `beep-pattern` in the [configuration file](#configuration-file)) controls the type of beep pattern. The following patterns are available:
+
+| Configuration Value | Pattern                                                                                                      |
+|---------------------|--------------------------------------------------------------------------------------------------------------|
+| continuous          | Short beep each second                                                                                       |
+| greenwich           | Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal) |
+
 ### Configuration File
 
 chrono-ntp supports a configuration file for default values. You can create a TOML file at `~/.chrono-ntp.toml` to specify your preferred options, which will be loaded automatically on startup.
@@ -109,9 +118,9 @@ time-zone = "Europe/Berlin"
 show-time-zone = true
 date-format = "YYYY-MM-DD"
 time-format = "ISO8601"
+beep-pattern = "greenwich"
 hide-date = false
 hide-status-bar = false
-beeps = true
 ```
 
 Any command-line options will override the values set in the configuration file.

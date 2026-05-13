@@ -28,8 +28,8 @@ func TestParseConfiguration_Defaults(t *testing.T) {
 	if config.TimeFormat != "ISO8601" {
 		t.Errorf("expected TimeFormat %q, got %q", "ISO8601", config.TimeFormat)
 	}
-	if config.Beeps != false {
-		t.Errorf("expected Beeps false, got %v", config.Beeps)
+	if config.BeepPattern != "" {
+		t.Errorf("expected BeepPattern '', got %q", config.BeepPattern)
 	}
 	if config.Offline != false {
 		t.Errorf("expected Offline false, got %v", config.Offline)
@@ -44,7 +44,7 @@ hide-status-bar = true
 hide-date = true
 show-time-zone = true
 time-format = "12h_AM_PM"
-beeps = true
+beep-pattern = "greenwich"
 offline = true
 `
 	config, _ := parseConfiguration([]byte(tomlContent))
@@ -67,8 +67,8 @@ offline = true
 	if config.TimeFormat != "12h_AM_PM" {
 		t.Errorf("expected TimeFormat '12h_AM_PM', got %q", config.TimeFormat)
 	}
-	if config.Beeps != true {
-		t.Errorf("expected Beeps true, got %v", config.Beeps)
+	if config.BeepPattern != "greenwich" {
+		t.Errorf("expected BeepPattern 'greenwich', got %q", config.BeepPattern)
 	}
 	if config.Offline != true {
 		t.Errorf("expected Offline true, got %v", config.Offline)
@@ -177,7 +177,7 @@ func TestWriteConfiguration(t *testing.T) {
 		HideDate:      true,
 		ShowTimeZone:  false,
 		TimeFormat:    "mars",
-		Beeps:         true,
+		BeepPattern:   "greenwich",
 		Offline:       true,
 	}
 

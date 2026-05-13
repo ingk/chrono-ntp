@@ -22,6 +22,7 @@ const (
 
 var allowedTimeFormats = display.AllowedTimeFormats[:]
 var allowedDateFormats = display.AllowedDateFormats[:]
+var allowedBeepPatterns = audio.AllowedBeepPatterns[:]
 var timeSource timesource.TimeSource
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 	showTimeZone := flag.Bool("show-time-zone", config.ShowTimeZone, "Show the time zone")
 	dateFormat := flag.String("date-format", "YYYY-MM-DD", fmt.Sprintf("Date display format (%s)", strings.Join(allowedDateFormats, ", ")))
 	timeFormat := flag.String("time-format", config.TimeFormat, fmt.Sprintf("Time display format (%s)", strings.Join(allowedTimeFormats, ", ")))
-	beeps := flag.Bool("beeps", config.Beeps, "Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal)")
+	beepPattern := flag.String("beep-pattern", config.BeepPattern, fmt.Sprintf("Beep pattern (%s)", strings.Join(allowedBeepPatterns, ", ")))
 	version := flag.Bool("version", false, "Show version and exit")
 	offline := flag.Bool("offline", false, "Run in offline mode (use system time, ignore NTP server)")
 	writeConfig := flag.Bool("write-config", false, "Write configuration file (merged from existing configuration file and flags)")
@@ -63,6 +64,10 @@ func main() {
 		log.Fatalf("Error: invalid time format '%s'. Allowed values: %s", *timeFormat, strings.Join(allowedTimeFormats, ", "))
 	}
 
+	if *beepPattern != "" && !slices.Contains(allowedBeepPatterns, *beepPattern) {
+		log.Fatalf("Error: invalid beep pattern '%s'. Allowed patterns: %s", *beepPattern, strings.Join(allowedBeepPatterns, ", "))
+	}
+
 	if *writeConfig {
 		mergedConfig := configuration.Configuration{
 			Server:        *ntpServer,
@@ -71,7 +76,7 @@ func main() {
 			HideDate:      *hideDate,
 			ShowTimeZone:  *showTimeZone,
 			TimeFormat:    *timeFormat,
-			Beeps:         *beeps,
+			BeepPattern:   *beepPattern,
 			Offline:       *offline,
 		}
 		configPath, err := configuration.WriteConfiguration(mergedConfig)
@@ -92,7 +97,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize audio context: %v", err)
 	}
-	beepsEnabled := *beeps && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
 
 	// Initialize display early to show loading message
 	d, err := display.NewDisplay()
@@ -126,6 +130,8 @@ func main() {
 	displayTicker := time.NewTicker(100 * time.Millisecond)
 	defer displayTicker.Stop()
 
+	beepsEnabled := *beepPattern != "" && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
+
 	for {
 		select {
 		case <-displayTicker.C:
@@ -144,7 +150,7 @@ func main() {
 			d.Update(*displayState)
 
 			if beepsEnabled {
-				audio.BeepTick(audioContext, timeStatus.ReferenceTime)
+				audio.BeepTick(audioContext, timeStatus.ReferenceTime, audio.BeepStrategy(*beepPattern))
 			}
 		case <-quitChan:
 			return

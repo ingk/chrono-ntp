@@ -20,7 +20,7 @@ type Configuration struct {
 	HideDate      bool   `toml:"hide-date"`
 	ShowTimeZone  bool   `toml:"show-time-zone"`
 	TimeFormat    string `toml:"time-format"`
-	Beeps         bool   `toml:"beeps"`
+	BeepPattern   string `toml:"beep-pattern"`
 	Offline       bool   `toml:"offline"`
 }
 
@@ -43,7 +43,7 @@ func parseConfiguration(data []byte) (Configuration, error) {
 		HideDate:      false,
 		ShowTimeZone:  true,
 		TimeFormat:    defaultTimeFormat,
-		Beeps:         false,
+		BeepPattern:   "",
 		Offline:       false,
 	}
 
