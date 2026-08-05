@@ -11,7 +11,7 @@ const (
 	amplitude    = 0.3
 	maxInt16     = 32767
 	shortMs      = 100
-	longMs       = 1000
+	longMs       = 500
 )
 
 func InitializeAudioContext() (*oto.Context, error) {
