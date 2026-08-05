@@ -6,24 +6,21 @@ import (
 	"log"
 	"slices"
 	"strings"
-	"time"
 
+	"chrono-ntp/app"
 	"chrono-ntp/audio"
 	"chrono-ntp/configuration"
 	"chrono-ntp/display"
-	"chrono-ntp/timesource"
 )
 
 const (
-	appName                   = "chrono-ntp"
-	appVersion                = "dev"
-	timeSourceRefreshInterval = 15 * time.Minute
+	appName    = "chrono-ntp"
+	appVersion = "dev"
 )
 
 var allowedTimeFormats = display.AllowedTimeFormats[:]
 var allowedDateFormats = display.AllowedDateFormats[:]
 var allowedBeepPatterns = audio.AllowedBeepPatterns[:]
-var timeSource timesource.TimeSource
 
 func main() {
 	config, err := configuration.LoadConfiguration()
@@ -67,6 +64,10 @@ func main() {
 	if *beepPattern != "" && !slices.Contains(allowedBeepPatterns, *beepPattern) {
 		log.Fatalf("Error: invalid beep pattern '%s'. Allowed patterns: %s", *beepPattern, strings.Join(allowedBeepPatterns, ", "))
 	}
+	beepEnabled := *beepPattern != "" && slices.Contains([]string{"ISO8601", "12h", "12h_AM_PM"}, *timeFormat)
+	if !beepEnabled {
+		*beepPattern = "silence"
+	}
 
 	if *writeConfig {
 		mergedConfig := configuration.Configuration{
@@ -88,72 +89,24 @@ func main() {
 		return
 	}
 
-	timeZoneLocation, err := time.LoadLocation(*timeZone)
-	if err != nil {
-		log.Fatalf("Failed to load location: %v", err)
-	}
+	audioContext, disp, timeSource, timeZoneLocation, beepStrategy := app.Init(app.InitOptions{
+		Server:      *ntpServer,
+		TimeZone:    *timeZone,
+		Offline:     *offline,
+		BeepPattern: *beepPattern,
+	})
 
-	audioContext, err := audio.InitializeAudioContext()
-	if err != nil {
-		log.Fatalf("Failed to initialize audio context: %v", err)
-	}
-
-	// Initialize display early to show loading message
-	d, err := display.NewDisplay()
-	if err != nil {
-		log.Fatalf("Failed to create display: %v", err)
-	}
-	if err := d.Init(); err != nil {
-		log.Fatalf("Failed to initialize display: %v", err)
-	}
-	defer d.Finalize()
-
-	if *offline {
-		timeSource = timesource.NewOfflineTimeSource()
-	} else {
-		timeSource = timesource.NewNtpTimeSource(*ntpServer)
-	}
-
-	go func() {
-		timeSource.Refresh()
-
-		ticker := time.NewTicker(timeSourceRefreshInterval)
-		defer ticker.Stop()
-		for range ticker.C {
-			timeSource.Refresh()
-		}
-	}()
-
-	quitChan := make(chan struct{})
-	go d.PollEvents(quitChan)
-
-	displayTicker := time.NewTicker(100 * time.Millisecond)
-	defer displayTicker.Stop()
-
-	beepsEnabled := *beepPattern != "" && !slices.Contains([]string{".beat", "septimal", "lunar", "mars"}, *timeFormat)
-
-	for {
-		select {
-		case <-displayTicker.C:
-			timeStatus := timeSource.TimeStatus()
-
-			displayState := &display.DisplayState{
-				TimeStatus:    timeStatus,
-				TimeZone:      timeZoneLocation,
-				DateFormat:    *dateFormat,
-				TimeFormat:    *timeFormat,
-				HideDate:      *hideDate,
-				ShowTimeZone:  *showTimeZone,
-				HideStatusBar: *hideStatusBar,
-				Offline:       *offline,
-			}
-			d.Update(*displayState)
-
-			if beepsEnabled {
-				audio.BeepTick(audioContext, timeStatus.ReferenceTime, audio.BeepStrategy(*beepPattern))
-			}
-		case <-quitChan:
-			return
-		}
-	}
+	app.Run(app.RunOptions{
+		AudioContext:  audioContext,
+		Display:       disp,
+		TimeSource:    timeSource,
+		Location:      timeZoneLocation,
+		BeepStrategy:  beepStrategy,
+		HideStatusBar: *hideStatusBar,
+		HideDate:      *hideDate,
+		ShowTimeZone:  *showTimeZone,
+		DateFormat:    *dateFormat,
+		TimeFormat:    *timeFormat,
+		Offline:       *offline,
+	})
 }

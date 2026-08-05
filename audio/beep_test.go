@@ -23,3 +23,24 @@ func TestMakeSineWaveTable_Range(t *testing.T) {
 		}
 	}
 }
+
+func TestReadEndOfFile(t *testing.T) {
+	reader := &beepReader{data: testSineWaveTable}
+	buf := make([]byte, len(testSineWaveTable)+10) // buffer larger than data
+	n, err := reader.Read(buf)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if n != len(testSineWaveTable) {
+		t.Errorf("expected to read %d bytes, got %d", len(testSineWaveTable), n)
+	}
+
+	// Read again to hit EOF
+	n, err = reader.Read(buf)
+	if err != nil && err.Error() != "EOF" {
+		t.Errorf("expected EOF error, got: %v", err)
+	}
+	if n != 0 {
+		t.Errorf("expected to read 0 bytes at EOF, got %d", n)
+	}
+}

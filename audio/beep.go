@@ -12,6 +12,7 @@ import (
 type BeepStrategy string
 
 const (
+	BeepStrategySilence    BeepStrategy = "silence"
 	BeepStrategyGreenwich  BeepStrategy = "greenwich"
 	BeepStrategyContinuous BeepStrategy = "continuous"
 )
@@ -31,6 +32,8 @@ func init() {
 
 func BeepTick(ctx *oto.Context, now time.Time, strategy BeepStrategy) {
 	switch strategy {
+	case BeepStrategySilence:
+		// Do nothing
 	case BeepStrategyGreenwich:
 		beepGreenwich(ctx, now)
 	case BeepStrategyContinuous:
