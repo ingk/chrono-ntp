@@ -101,10 +101,10 @@ The `-time-format` option (or `time-format` in the [configuration file](#configu
 
 The `-beep-pattern` option (or `beep-pattern` in the [configuration file](#configuration-file)) controls the type of beep pattern. The following patterns are available:
 
-| Configuration Value | Pattern                                                                                                      |
-|---------------------|--------------------------------------------------------------------------------------------------------------|
-| continuous          | Short beep each second                                                                                       |
-| greenwich           | Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the Greenwich Time Signal) |
+| Configuration Value | Pattern                                                                                                                                                             |
+|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| continuous          | Short beep each second                                                                                                                                              |
+| greenwich           | Play 6 beeps at the end of each minute, with the sixth beep at second 0 (emulates the [Greenwich Time Signal](https://en.wikipedia.org/wiki/Greenwich_Time_Signal)) |
 
 ### Configuration File
 
