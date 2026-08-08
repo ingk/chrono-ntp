@@ -131,8 +131,8 @@ func TestConfigurationPathsAndWriteLoad(t *testing.T) {
 	t.Run("search paths include user and home", func(t *testing.T) {
 		tmp := createTempDir(t, "cfg-search")
 		defer os.RemoveAll(tmp)
-		withUserConfigDir(t, string(filepath.Separator)+"tmp")
-		t.Setenv("HOME", string(filepath.Separator)+"tmp")
+		withUserConfigDir(t, tmp)
+		t.Setenv("HOME", tmp)
 
 		ps := configurationSearchPaths()
 		if len(ps) < 2 {

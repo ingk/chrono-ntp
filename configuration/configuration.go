@@ -9,8 +9,8 @@ import (
 )
 
 var (
-    userConfigDir = os.UserConfigDir
-    tomlMarshal  = toml.Marshal
+	userConfigDir = os.UserConfigDir
+	tomlMarshal   = toml.Marshal
 )
 
 const (
@@ -119,12 +119,12 @@ func configWritePath() (string, error) {
 
 func LoadConfiguration() (Configuration, error) {
 	for _, configPath := range configurationSearchPaths() {
-		data, err := getConfigurationContents(configPath)
+		contents, err := getConfigurationContents(configPath)
 		if err != nil {
 			return Configuration{}, err
 		}
-		if data != nil {
-			return parseConfiguration(data)
+		if contents != nil {
+			return parseConfiguration(contents)
 		}
 	}
 
