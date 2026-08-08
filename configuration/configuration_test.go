@@ -1,43 +1,53 @@
 package configuration
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 )
 
-func TestParseConfiguration_Defaults(t *testing.T) {
-	config, _ := parseConfiguration(nil)
+func createTempDir(t *testing.T, name string) string {
+	t.Helper()
+	tempDir, err := os.MkdirTemp("", name)
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	t.Cleanup(func() { os.RemoveAll(tempDir) })
+	return tempDir
+}
 
-	if config.Server != "time.google.com" {
-		t.Errorf("expected Server %q, got %q", "time.google.com", config.Server)
+func mustWriteFile(t *testing.T, path string, data []byte, perm os.FileMode) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("failed to mkdirall %s: %v", path, err)
 	}
-	if config.TimeZone != "Local" {
-		t.Errorf("expected TimeZone %q, got %q", "Local", config.TimeZone)
-	}
-	if config.HideStatusBar != false {
-		t.Errorf("expected HideStatusBar false, got %v", config.HideStatusBar)
-	}
-	if config.HideDate != false {
-		t.Errorf("expected HideDate false, got %v", config.HideDate)
-	}
-	if config.ShowTimeZone != true {
-		t.Errorf("expected ShowTimeZone true, got %v", config.ShowTimeZone)
-	}
-	if config.TimeFormat != "ISO8601" {
-		t.Errorf("expected TimeFormat %q, got %q", "ISO8601", config.TimeFormat)
-	}
-	if config.BeepPattern != "" {
-		t.Errorf("expected BeepPattern '', got %q", config.BeepPattern)
-	}
-	if config.Offline != false {
-		t.Errorf("expected Offline false, got %v", config.Offline)
+	if err := os.WriteFile(path, data, perm); err != nil {
+		t.Fatalf("failed to write file %s: %v", path, err)
 	}
 }
 
-func TestParseConfiguration_Content(t *testing.T) {
-	tomlContent := `
+func withUserConfigDir(t *testing.T, dir string) {
+	t.Helper()
+	old := userConfigDir
+	userConfigDir = func() (string, error) { return dir, nil }
+	t.Cleanup(func() { userConfigDir = old })
+}
+
+// Tests
+func TestParseConfiguration(t *testing.T) {
+	t.Run("defaults", func(t *testing.T) {
+		cfg, err := parseConfiguration(nil)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cfg.Server != defaultConfiguration().Server {
+			t.Fatalf("expected default server %q, got %q", defaultConfiguration().Server, cfg.Server)
+		}
+	})
+
+	t.Run("content", func(t *testing.T) {
+		raw := []byte(`
 server = "pool.example-time-server.org"
 time-zone = "Europe/Berlin"
 hide-status-bar = true
@@ -46,185 +56,301 @@ show-time-zone = true
 time-format = "12h_AM_PM"
 beep-pattern = "greenwich"
 offline = true
-`
-	config, _ := parseConfiguration([]byte(tomlContent))
+`)
+		cfg, err := parseConfiguration(raw)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if cfg.Server != "pool.example-time-server.org" {
+			t.Fatalf("bad server: %q", cfg.Server)
+		}
+		if cfg.TimeZone != "Europe/Berlin" {
+			t.Fatalf("bad timezone: %q", cfg.TimeZone)
+		}
+	})
 
-	if config.Server != "pool.example-time-server.org" {
-		t.Errorf("expected Server 'pool.example-time-server.org', got %q", config.Server)
+	t.Run("invalid", func(t *testing.T) {
+		if _, err := parseConfiguration([]byte("not valid toml")); err == nil {
+			t.Fatal("expected parse error")
+		}
+	})
+}
+
+func TestCanonicalizeDir(t *testing.T) {
+	if _, err := canonicalizeDir(""); err == nil {
+		t.Fatal("expected error for empty path")
 	}
-	if config.TimeZone != "Europe/Berlin" {
-		t.Errorf("expected TimeZone 'Europe/Berlin', got %q", config.TimeZone)
+	if _, err := canonicalizeDir("relative/path"); err == nil {
+		t.Fatal("expected error for relative path")
 	}
-	if config.HideStatusBar != true {
-		t.Errorf("expected HideStatusBar true, got %v", config.HideStatusBar)
+	abs := string(filepath.Separator) + "tmp"
+	got, err := canonicalizeDir(abs)
+	if err != nil {
+		t.Fatalf("expected no error for absolute path: %v", err)
 	}
-	if config.HideDate != true {
-		t.Errorf("expected HideDate true, got %v", config.HideDate)
-	}
-	if config.ShowTimeZone != true {
-		t.Errorf("expected ShowTimeZone true, got %v", config.ShowTimeZone)
-	}
-	if config.TimeFormat != "12h_AM_PM" {
-		t.Errorf("expected TimeFormat '12h_AM_PM', got %q", config.TimeFormat)
-	}
-	if config.BeepPattern != "greenwich" {
-		t.Errorf("expected BeepPattern 'greenwich', got %q", config.BeepPattern)
-	}
-	if config.Offline != true {
-		t.Errorf("expected Offline true, got %v", config.Offline)
+	if got != abs {
+		t.Fatalf("expected %q, got %q", abs, got)
 	}
 }
 
-func TestLoadConfiguration(t *testing.T) {
-	// Create a temporary directory to act as HOME
-	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+func TestGetConfigurationContents(t *testing.T) {
+	tmp := createTempDir(t, "cfg-contents")
+	defer os.RemoveAll(tmp)
+
+	path := filepath.Join(tmp, "config.toml")
+	mustWriteFile(t, path, []byte("server = \"ok\""), 0o644)
+
+	data, err := getConfigurationContents(path)
 	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
-	defer os.RemoveAll(tempDir)
-
-	// Set HOME to the temp directory
-	oldHome := os.Getenv("HOME")
-	os.Setenv("HOME", tempDir)
-	defer os.Setenv("HOME", oldHome)
-
-	// Write a config file in the temp HOME
-	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
-	tomlContent := `
-server = "mocked.server"
-time-zone = "UTC"
-`
-	if err := os.WriteFile(configPath, []byte(tomlContent), 0644); err != nil {
-		t.Fatalf("Failed to write mock config: %v", err)
+	if string(data) != "server = \"ok\"" {
+		t.Fatalf("unexpected contents: %s", string(data))
 	}
 
-	config, err := LoadConfiguration()
-
+	missing, err := getConfigurationContents(filepath.Join(tmp, "missing.toml"))
 	if err != nil {
-		t.Errorf("unexpected error', got %v", err)
+		t.Fatalf("unexpected error for missing file: %v", err)
 	}
-	if config.Server != "mocked.server" {
-		t.Errorf("expected Server 'mocked.server', got %q", config.Server)
+	if missing != nil {
+		t.Fatal("expected nil for missing file")
 	}
-	if config.TimeZone != "UTC" {
-		t.Errorf("expected TimeZone 'UTC', got %q", config.TimeZone)
+
+	blocked := filepath.Join(tmp, "blocked")
+	if err := os.Mkdir(blocked, 0); err != nil {
+		t.Fatalf("failed to create blocked dir: %v", err)
+	}
+	defer func() { os.Chmod(blocked, 0o755) }()
+
+	if _, err := getConfigurationContents(filepath.Join(blocked, "f")); err == nil {
+		t.Fatal("expected error for blocked dir")
 	}
 }
 
-func TestLoadConfiguration_Error(t *testing.T) {
-	// Create a temporary directory to act as HOME
-	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
+func TestConfigurationPathsAndWriteLoad(t *testing.T) {
+	t.Run("search paths include user and home", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-search")
+		defer os.RemoveAll(tmp)
+		withUserConfigDir(t, tmp)
+		t.Setenv("HOME", tmp)
 
-	// Set HOME to the temp directory
-	oldHome := os.Getenv("HOME")
-	os.Setenv("HOME", tempDir)
-	defer os.Setenv("HOME", oldHome)
+		ps := configurationSearchPaths()
+		if len(ps) < 2 {
+			t.Fatalf("expected >=2 paths, got %d", len(ps))
+		}
+	})
 
-	// Write a config file in the temp HOME
-	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
-	tomlContent := `invalid-toml`
-	if err := os.WriteFile(configPath, []byte(tomlContent), 0644); err != nil {
-		t.Fatalf("Failed to write mock config: %v", err)
-	}
+	t.Run("config write path falls back to HOME", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-write")
+		defer os.RemoveAll(tmp)
+		// force userConfigDir to fail
+		old := userConfigDir
+		userConfigDir = func() (string, error) { return "", errors.New("fail") }
+		t.Cleanup(func() { userConfigDir = old })
+		t.Setenv("HOME", tmp)
 
-	config, err := LoadConfiguration()
+		got, err := configWritePath()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		want := filepath.Join(tmp, defaultConfigFileName)
+		if got != want {
+			t.Fatalf("expected %q got %q", want, got)
+		}
+	})
 
-	if err == nil {
-		t.Fatalf("expected error, got %v", config)
-	}
+	t.Run("config write errors without HOME", func(t *testing.T) {
+		old := userConfigDir
+		userConfigDir = func() (string, error) { return "", errors.New("fail") }
+		t.Cleanup(func() { userConfigDir = old })
+		os.Unsetenv("HOME")
+
+		if _, err := configWritePath(); err == nil {
+			t.Fatal("expected error with no HOME and no user config dir")
+		}
+	})
+
+	t.Run("write permissions and load fallback", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-writeperm")
+		defer os.RemoveAll(tmp)
+		withUserConfigDir(t, tmp)
+		t.Setenv("HOME", tmp)
+
+		cfg := Configuration{Server: "perm.server", TimeZone: "UTC"}
+		path, err := WriteConfiguration(cfg)
+		if err != nil {
+			t.Fatalf("write error: %v", err)
+		}
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Fatalf("stat error: %v", err)
+		}
+		if info.Mode().Perm() != 0o600 {
+			t.Fatalf("expected 0600 got %v", info.Mode().Perm())
+		}
+	})
 }
 
-func TestLoadConfiguration_MissingFile(t *testing.T) {
-	// Create a temporary directory to act as HOME
-	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
+func TestLoadAndWriteEdgeCases(t *testing.T) {
+	t.Run("load from configdir precedence", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-load-cfgdir")
+		defer os.RemoveAll(tmp)
+		t.Setenv("HOME", tmp)
+		t.Setenv("XDG_CONFIG_HOME", tmp)
 
-	// Set HOME to the temp directory
-	oldHome := os.Getenv("HOME")
-	os.Setenv("HOME", tempDir)
-	defer os.Setenv("HOME", oldHome)
+		userCfgDir, err := os.UserConfigDir()
+		if err != nil {
+			t.Fatalf("userConfigDir failed: %v", err)
+		}
+		cfgDir := filepath.Join(userCfgDir, appConfigDirName)
+		cfgPath := filepath.Join(cfgDir, appConfigFileName)
+		mustWriteFile(t, cfgPath, []byte("server = \"configdir.server\"\ntime-zone = \"UTC\"\n"), 0o644)
+		mustWriteFile(t, filepath.Join(tmp, defaultConfigFileName), []byte("server = \"home.server\"\n"), 0o644)
 
-	_, configErr := LoadConfiguration()
+		cfg, err := LoadConfiguration()
+		if err != nil {
+			t.Fatalf("load error: %v", err)
+		}
+		if cfg.Server != "configdir.server" {
+			t.Fatalf("expected configdir.server got %q", cfg.Server)
+		}
+	})
 
-	if configErr != nil {
-		t.Errorf("did not expect error, got %v", configErr)
-	}
+	t.Run("load fallback from HOME", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-load-home")
+		defer os.RemoveAll(tmp)
+		t.Setenv("HOME", tmp)
+		mustWriteFile(t, filepath.Join(tmp, defaultConfigFileName), []byte("server = \"mocked.server\"\ntime-zone = \"UTC\"\n"), 0o644)
+
+		cfg, err := LoadConfiguration()
+		if err != nil {
+			t.Fatalf("load error: %v", err)
+		}
+		if cfg.Server != "mocked.server" {
+			t.Fatalf("expected mocked.server got %q", cfg.Server)
+		}
+	})
+
+	t.Run("load returns error for invalid toml", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-load-invalid")
+		defer os.RemoveAll(tmp)
+		t.Setenv("HOME", tmp)
+		mustWriteFile(t, filepath.Join(tmp, defaultConfigFileName), []byte("invalid-toml"), 0o644)
+
+		if _, err := LoadConfiguration(); err == nil {
+			t.Fatal("expected error for invalid toml")
+		}
+	})
+
+	t.Run("write fallback and load", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-write-fallback")
+		defer os.RemoveAll(tmp)
+		t.Setenv("HOME", tmp)
+		old := userConfigDir
+		userConfigDir = func() (string, error) { return "", errors.New("fail") }
+		t.Cleanup(func() { userConfigDir = old })
+
+		cfg := Configuration{Server: "fallback.server", TimeZone: "UTC"}
+		got, err := WriteConfiguration(cfg)
+		if err != nil {
+			t.Fatalf("write failed: %v", err)
+		}
+		if got != filepath.Join(tmp, defaultConfigFileName) {
+			t.Fatalf("unexpected write path: %q", got)
+		}
+		loaded, err := LoadConfiguration()
+		if err != nil {
+			t.Fatalf("load failed: %v", err)
+		}
+		if loaded.Server != "fallback.server" {
+			t.Fatalf("expected fallback.server got %q", loaded.Server)
+		}
+	})
+
+	t.Run("write errors when configdir is blocked", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-write-blocked")
+		defer os.RemoveAll(tmp)
+		t.Setenv("HOME", tmp)
+		t.Setenv("XDG_CONFIG_HOME", tmp)
+
+		userCfgDir, err := os.UserConfigDir()
+		if err != nil {
+			t.Fatalf("user configdir failed: %v", err)
+		}
+		blocked := filepath.Join(userCfgDir, appConfigDirName)
+		// create a file where a directory is expected
+		if err := os.MkdirAll(filepath.Dir(blocked), 0o755); err != nil {
+			t.Fatalf("mkdirall failed: %v", err)
+		}
+		if err := os.WriteFile(blocked, []byte("not-a-dir"), 0o644); err != nil {
+			t.Fatalf("write failed: %v", err)
+		}
+
+		if _, err := WriteConfiguration(Configuration{}); err == nil {
+			t.Fatal("expected write error when dir blocked")
+		}
+	})
+
+	t.Run("toml marshal error bubbles up", func(t *testing.T) {
+		old := tomlMarshal
+		tomlMarshal = func(v interface{}) ([]byte, error) { return nil, errors.New("marshal fail") }
+		t.Cleanup(func() { tomlMarshal = old })
+
+		tmp := createTempDir(t, "cfg-marshal-fail")
+		defer os.RemoveAll(tmp)
+		withUserConfigDir(t, tmp)
+		t.Setenv("HOME", tmp)
+
+		if _, err := WriteConfiguration(Configuration{Server: "s"}); err == nil {
+			t.Fatal("expected marshal error")
+		}
+	})
+
+	t.Run("home mkdirall error", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-home-mkdirfail")
+		defer os.RemoveAll(tmp)
+		// create a file at HOME so MkdirAll on files fails
+		homeFile := filepath.Join(tmp, "homefile")
+		mustWriteFile(t, homeFile, []byte("block"), 0o644)
+		old := userConfigDir
+		userConfigDir = func() (string, error) { return "", errors.New("fail") }
+		t.Cleanup(func() { userConfigDir = old })
+		t.Setenv("HOME", homeFile)
+
+		if _, err := configWritePath(); err == nil {
+			t.Fatal("expected error when HOME path not writable")
+		}
+	})
+
+	t.Run("load returns error when config path unreadable", func(t *testing.T) {
+		tmp := createTempDir(t, "cfg-blocked-read")
+		defer os.RemoveAll(tmp)
+		blocked := filepath.Join(tmp, "chrono-ntp")
+		if err := os.WriteFile(blocked, []byte("not-a-dir"), 0o644); err != nil {
+			t.Fatalf("write failed: %v", err)
+		}
+		withUserConfigDir(t, tmp)
+		t.Setenv("HOME", tmp)
+
+		if _, err := LoadConfiguration(); err == nil {
+			t.Fatal("expected error when config path unreadable")
+		}
+	})
 }
 
-func TestWriteConfiguration(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
+func TestLoadConfiguration_NoFiles(t *testing.T) {
+	tmp := createTempDir(t, "cfg-nofiles")
+	defer os.RemoveAll(tmp)
+
+	// Ensure userConfigDir returns a valid dir but no config files exist.
+	withUserConfigDir(t, tmp)
+	t.Setenv("HOME", tmp)
+
+	cfg, err := LoadConfiguration()
 	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
+		t.Fatalf("expected no error, got %v", err)
 	}
-	defer os.RemoveAll(tempDir)
-
-	oldHome := os.Getenv("HOME")
-	os.Setenv("HOME", tempDir)
-	defer os.Setenv("HOME", oldHome)
-
-	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
-	config := Configuration{
-		Server:        "write.test.server",
-		TimeZone:      "Mars/Colony",
-		HideStatusBar: true,
-		HideDate:      true,
-		ShowTimeZone:  false,
-		TimeFormat:    "mars",
-		BeepPattern:   "greenwich",
-		Offline:       true,
-	}
-
-	configPathResult, err := WriteConfiguration(config)
-
-	if configPathResult != configPath {
-		t.Fatalf("expected config path %q, got %q", configPath, configPathResult)
-	}
-
-	if err != nil {
-		t.Fatalf("Failed to write configuration: %v", err)
-	}
-
-	loadedConfig, err := LoadConfiguration()
-	if err != nil {
-		t.Fatalf("Failed to load configuration: %v", err)
-	}
-
-	if !reflect.DeepEqual(config, loadedConfig) {
-		t.Fatalf("Written configuration does not equal configuration: %v %v", config, loadedConfig)
-	}
-}
-
-func TestWriteConfiguration_WriteError(t *testing.T) {
-	tempDir, err := os.MkdirTemp("", "chrono-ntp-test-home")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	oldHome := os.Getenv("HOME")
-	os.Setenv("HOME", tempDir)
-	defer os.Setenv("HOME", oldHome)
-
-	configPath := filepath.Join(tempDir, ".chrono-ntp.toml")
-	if err := os.Mkdir(configPath, 0755); err != nil {
-		t.Fatalf("Failed to create directory to block config file: %v", err)
-	}
-
-	config := Configuration{}
-	configPathResult, err := WriteConfiguration(config)
-
-	if configPathResult != configPath {
-		t.Fatalf("expected config path %q, got %q", configPath, configPathResult)
-	}
-
-	if err == nil {
-		t.Fatalf("expected error, got %v", err)
+	if cfg.Server != defaultConfiguration().Server {
+		t.Fatalf("expected default server %q, got %q", defaultConfiguration().Server, cfg.Server)
 	}
 }
