@@ -41,8 +41,8 @@ func TestParseConfiguration(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if cfg.Server != defaultNtpServer {
-			t.Fatalf("expected default server %q, got %q", defaultNtpServer, cfg.Server)
+		if cfg.Server != defaultConfiguration().Server {
+			t.Fatalf("expected default server %q, got %q", defaultConfiguration().Server, cfg.Server)
 		}
 	})
 
@@ -350,7 +350,7 @@ func TestLoadConfiguration_NoFiles(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
-	if cfg.Server != defaultNtpServer {
-		t.Fatalf("expected default server %q, got %q", defaultNtpServer, cfg.Server)
+	if cfg.Server != defaultConfiguration().Server {
+		t.Fatalf("expected default server %q, got %q", defaultConfiguration().Server, cfg.Server)
 	}
 }

@@ -14,9 +14,6 @@ var (
 )
 
 const (
-	defaultNtpServer      = "time.google.com"
-	defaultTimeFormat     = "ISO8601"
-	defaultTimeZone       = "Local"
 	defaultConfigFileName = ".chrono-ntp.toml"
 	appConfigDirName      = "chrono-ntp"
 	appConfigFileName     = "chrono-ntp.toml"
@@ -33,6 +30,19 @@ type Configuration struct {
 	Offline       bool   `toml:"offline"`
 }
 
+func defaultConfiguration() Configuration {
+	return Configuration{
+		Server:        "time.google.com",
+		TimeZone:      "Local",
+		HideStatusBar: false,
+		HideDate:      false,
+		ShowTimeZone:  true,
+		TimeFormat:    "ISO8601",
+		BeepPattern:   "",
+		Offline:       false,
+	}
+}
+
 func getConfigurationContents(path string) ([]byte, error) {
 	_, err := os.Stat(path)
 
@@ -45,16 +55,7 @@ func getConfigurationContents(path string) ([]byte, error) {
 }
 
 func parseConfiguration(data []byte) (Configuration, error) {
-	config := Configuration{
-		Server:        defaultNtpServer,
-		TimeZone:      defaultTimeZone,
-		HideStatusBar: false,
-		HideDate:      false,
-		ShowTimeZone:  true,
-		TimeFormat:    defaultTimeFormat,
-		BeepPattern:   "",
-		Offline:       false,
-	}
+	config := defaultConfiguration()
 
 	err := toml.Unmarshal(data, &config)
 	if err != nil {
