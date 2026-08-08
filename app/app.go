@@ -91,7 +91,7 @@ func Run(options RunOptions) {
 		case <-displayTicker.C:
 			timeStatus := options.TimeSource.TimeStatus()
 
-			displayState := &display.DisplayState{
+			options.Display.Update(display.DisplayState{
 				TimeStatus:    timeStatus,
 				TimeZone:      options.Location,
 				DateFormat:    options.DateFormat,
@@ -100,8 +100,7 @@ func Run(options RunOptions) {
 				ShowTimeZone:  options.ShowTimeZone,
 				HideStatusBar: options.HideStatusBar,
 				Offline:       options.Offline,
-			}
-			options.Display.Update(*displayState)
+			})
 
 			audio.BeepTick(options.AudioContext, timeStatus.ReferenceTime, options.BeepStrategy)
 		case <-quit:
